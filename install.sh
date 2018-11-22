@@ -43,10 +43,10 @@ fi
 
 
 # Installing header files for systemd
-echo "Installing header files for systemd..."
+echo "Installing header files for libsystemd, libatlas-base and libhdf5..."
 echo ""
 echo ""
-sudo apt install libsystemd-dev
+sudo apt install -y libsystemd-dev libatlas-base-dev  libhdf5-dev
 
 # Print the Kernel version
 kernel_version=`uname -a|awk '{print $3}'`
