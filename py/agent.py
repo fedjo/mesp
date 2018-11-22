@@ -195,7 +195,8 @@ if __name__ == "__main__":
             if(len(readerThreadList) > 0 and
                len(writerThreadList) > 0):
                 readerThreadList[0]._read_data()
-                writerThreadList[0]._process_data(top_k)
+                body_sizes = writerThreadList[0]._process_data(top_k)
+                logger.info(body_sizes)
                 time.sleep(45)
 
 

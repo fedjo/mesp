@@ -17,13 +17,16 @@ class GeneralSink(threading.Thread):
         self.lock = queuelock
         self.schema = schema
         self.logger = logger
-        self.post = None
+        self.raw_post = None
+        self.ngsi_post = None
         self.exitFlag = 0
 
     def _process_data(self, classf_table):
         self.process_data(self.name, self.q, classf_table)
 
     def process_data(self, threadName, q, classf_table):
+        req_bytes = dict()
+        i = 1
         while not self.exitFlag:
             if not self.q.empty():
                 self.lock.acquire()
@@ -31,10 +34,14 @@ class GeneralSink(threading.Thread):
                 self.lock.release()
                 self.logger.debug("{} Got data {}".format(self.name, data))
                 self.logger.debug("Classification: {}".format(classf_table))
-                self.post(data, self.schema, classf_table)
+                req_bytes['raw'][i] = self.raw_post(data, self.schema, classf_table)
+                req_bytes['ngsi'][i] = 0
+                req_bytes['json-ld'][i] = 0
+                i += 1
                 break
             else:
                 continue
+        return raw_bytes
 
     def run(self):
         self.logger.info("Starting %s %s" % (self.stype, self.name))
@@ -48,7 +55,7 @@ class OrionSink(GeneralSink):
         self.logger = logger
         GeneralSink.__init__(self, threadID, 'Orion', name, q, queuelock,
                              schema, logger)
-        self.post = self.posttoorion
+        self.raw_post = self.posttoorion
         self.cross_ref_unique_ids = []
         self.url = url
 
@@ -120,7 +127,6 @@ class OrionSink(GeneralSink):
         json = translate(snapshot, pts, classf_table, self.logger)
         ts2 = time.time()
         self.logger.debug(json)
-        # print "posting"
 
         translation_time = ts2-ts1_received
         volume = sys.getsizeof(json)
@@ -133,8 +139,11 @@ class OrionSink(GeneralSink):
         if self.url:
             url = self.url + '/v2/entities'
             headers = {'Accept': 'application/json', 'X-Auth-Token': 'QGIrJsK6sSyKfvZvnsza6DlgjSUa8t'}
-            # print url
-            response = requests.post(url, json=json)
+            sess = requests.Session()
+            req = requests.Request('POST', url=url, json=json)
+            preq = req.prepare()
+            json_size = len(preq.body)
+            response = sess.send(preq)
 
             self.logger.debug("response")
             self.logger.debug(response.text)
@@ -142,3 +151,6 @@ class OrionSink(GeneralSink):
         self.cross_ref_unique_ids.append(str(pts))
         self.logger.debug("list of ids translated and send:")
         self.logger.debug(str(pts))
+        self.logger.debug("size of request body sent:")
+        self.logger.debug(json_size)
+        return json_size

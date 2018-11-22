@@ -2,6 +2,9 @@ import threading
 import time
 
 import serial
+import busio
+import adafruit_ina219
+from board import SCL, SDA
 from serial.serialposix import Serial
 from confluent_kafka import Consumer, KafkaError
 from confluent_kafka.avro import AvroConsumer
@@ -119,3 +122,30 @@ class KafkaSource(GeneralSource):
         istream = c
         GeneralSource.__init__(self, threadID, 'Kafka', name, q, queuelock,
                                istream, logger)
+
+
+class ConsumptionSource(object):
+    def __init__(self, logger)
+        self.i2c_bus = busio.I2C(SCL, SDA)
+        self.ina219 = adafruit_ina219.INA219(i2c_bus)
+
+
+    def bus_voltage(self):
+        # Return value in volt
+        return self.ina219.bus_voltage
+
+    def shunt_voltage(self):
+        # Return value in milliVolt
+        return (self.ina219.shunt_voltage / 1000)
+
+    def load_voltage(self):
+        # Return value in volt
+        return self.bus_voltage() + self.shunt_voltage()
+
+    def current(self):
+        # Return value in milliAmper
+        return self.ina219.current
+
+    def power(self):
+        # Return value in milliWatt
+        return (self.bus_voltage() + self.shunt_voltage()) * self.current()
