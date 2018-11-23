@@ -6,15 +6,16 @@ import threading
 import logging
 import sys
 import time
-import ConfigParser
 import re
 import argparse
 from systemd.journal import JournaldLogHandler
 if sys.version_info[0] < 3:
     import Queue
+    import ConfigParser
 else:
     import queue as Queue
-from sources import SerialSource, FileSource, KafkaSource, ConsumptionSource
+    import configparser as ConfigParser
+from sources import SerialSource, FileSource, KafkaSource 
 from sink import OrionSink
 from classification import TensorflowClassifier
 from camera import Camera
@@ -193,13 +194,9 @@ if __name__ == "__main__":
         writerThreadList.append(thread)
         threadID += 1
 
-    # Code to write metrics to a file
-    consumption = ConsumptionSource('/home/pi/Desktop/mdpi-metrics.txt')
-    consumption.run()
 
     while 1:
         if(camera and tfclassify):
-            metrics = consumption.get_metrics()
             top_k = tfclassify.classify(camera.capture())
             if(len(readerThreadList) > 0 and
                len(writerThreadList) > 0):

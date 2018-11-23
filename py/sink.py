@@ -22,10 +22,13 @@ class GeneralSink(threading.Thread):
         self.exitFlag = 0
 
     def _process_data(self, classf_table):
-        self.process_data(self.name, self.q, classf_table)
+        return self.process_data(self.name, self.q, classf_table)
 
     def process_data(self, threadName, q, classf_table):
         req_bytes = dict()
+        req_bytes['raw'] = dict()
+        req_bytes['ngsi'] = dict()
+        req_bytes['json-ld'] = dict()
         i = 1
         while not self.exitFlag:
             if not self.q.empty():
@@ -41,7 +44,7 @@ class GeneralSink(threading.Thread):
                 break
             else:
                 continue
-        return raw_bytes
+        return req_bytes
 
     def run(self):
         self.logger.info("Starting %s %s" % (self.stype, self.name))
