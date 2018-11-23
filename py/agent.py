@@ -14,7 +14,7 @@ if sys.version_info[0] < 3:
     import Queue
 else:
     import queue as Queue
-from sources import SerialSource, FileSource, KafkaSource
+from sources import SerialSource, FileSource, KafkaSource, ConsumptionSource
 from sink import OrionSink
 from classification import TensorflowClassifier
 from camera import Camera
@@ -102,8 +102,12 @@ if __name__ == "__main__":
     journald_handler.setFormatter(logging.Formatter(
             '[%(levelname)s] %(message)s'
     ))
+    # create file handler which logs even debug messages
+    file_handler = logging.FileHandler('/home/pi/Desktop/agent.log')
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     # add the journald handler to the current logger
     logger.addHandler(journald_handler)
+    logger.addHandler(file_handler)
     # optionally set the logging level
     if args.log_level:
         logger.setLevel(logging.INFO)
@@ -189,8 +193,13 @@ if __name__ == "__main__":
         writerThreadList.append(thread)
         threadID += 1
 
+    # Code to write metrics to a file
+    consumption = ConsumptionSource('/home/pi/Desktop/mdpi-metrics.txt')
+    consumption.run()
+
     while 1:
         if(camera and tfclassify):
+            metrics = consumption.get_metrics()
             top_k = tfclassify.classify(camera.capture())
             if(len(readerThreadList) > 0 and
                len(writerThreadList) > 0):

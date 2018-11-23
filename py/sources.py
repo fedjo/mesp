@@ -1,5 +1,6 @@
 import threading
 import time
+import datetime
 
 import serial
 import busio
@@ -124,28 +125,23 @@ class KafkaSource(GeneralSource):
                                istream, logger)
 
 
-class ConsumptionSource(object):
-    def __init__(self, logger)
-        self.i2c_bus = busio.I2C(SCL, SDA)
-        self.ina219 = adafruit_ina219.INA219(i2c_bus)
+class ConsumptionSource(threading):
+    def __init__(self, metrics_file)
+        i2c_bus = busio.I2C(SCL, SDA)
+        ina219 = adafruit_ina219.INA219(i2c_bus)
+        self.load_voltage = ina219.bus_voltage + ina219.shunt_voltage
+        self.current = ina219.current
+        self.power = self.load_voltage * self.current
+        self.filepath = metrics_filepath
 
+    def get_metrics(self):
+        return (self.load_voltage, self.current, self.power)
 
-    def bus_voltage(self):
-        # Return value in volt
-        return self.ina219.bus_voltage
+    def run(self):
+        with open(self.filepath, 'wa+') as f:
+            while True:
+                f.write("{}:\tVoltage: {} V\n\tCurrent: {} mA\n\tPower: {} mW".
+                        format(str(datetime.datetime.now()), self.load_voltage,
+                               self.current, self.power))
+                time.sleep(2)
 
-    def shunt_voltage(self):
-        # Return value in milliVolt
-        return (self.ina219.shunt_voltage / 1000)
-
-    def load_voltage(self):
-        # Return value in volt
-        return self.bus_voltage() + self.shunt_voltage()
-
-    def current(self):
-        # Return value in milliAmper
-        return self.ina219.current
-
-    def power(self):
-        # Return value in milliWatt
-        return (self.bus_voltage() + self.shunt_voltage()) * self.current()
