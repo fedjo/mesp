@@ -1,6 +1,7 @@
 import threading
 import datetime
 import time
+import csv
 import busio
 import adafruit_ina219
 from board import SCL, SDA
@@ -19,15 +20,14 @@ class ConsumptionSource(threading.Thread):
         return (self.load_voltage, self.current, self.power)
 
     def run(self):
-        with open(self.filepath, 'w+') as f:
+        with open(self.filepath, 'w+') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL))
+            writer.writerow(['Timestamp', 'Voltage (V)', 'Current (mA)', 'Power (mW)']) 
             while True:
-                f.write("Writing")
-                f.write("{}:\tVoltage: {} V\n\tCurrent: {} mA\n\tPower: {} mW".
-                        format(str(datetime.datetime.now()), self.load_voltage,
-                               self.current, self.power))
-                f.flush()
+                writer.writerow([str(datetime.datetime.now()), self.load_voltage,
+                               self.current, self.power)])
+                csvfile.flush()
                 time.sleep(2)
-
 
 
 if __name__ == "__main__":
