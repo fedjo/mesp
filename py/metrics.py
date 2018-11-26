@@ -1,6 +1,7 @@
 import threading
 import datetime
 import time
+import sys
 import csv
 import busio
 import adafruit_ina219
@@ -21,8 +22,8 @@ class ConsumptionSource(threading.Thread):
 
     def run(self):
         with open(self.filepath, 'w+') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL))
-            writer.writerow(['Timestamp', 'Voltage (V)', 'Current (mA)', 'Power (mW)']) 
+            writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(['Timestamp', 'Voltage (V)', 'Current (mA)', 'Power (mW)'])
             while True:
                 writer.writerow([str(datetime.datetime.now()), self.load_voltage,
                                self.current, self.power)])
@@ -33,5 +34,5 @@ class ConsumptionSource(threading.Thread):
 if __name__ == "__main__":
 
     # Code to write metrics to a file
-    consumption = ConsumptionSource('/home/pi/Desktop/mdpi-metrics.txt')
+    consumption = ConsumptionSource(sys.argv[1])
     consumption.run()

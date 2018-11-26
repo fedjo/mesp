@@ -56,7 +56,7 @@ class OrionSink(GeneralSink):
         self.url = url
         self.metricspath ='/home/pi/Desktop/ngsi-metrics.csv'
         with open(self.metricspath, 'w+') as csvfile:
-                writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL))
+                writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 writer.writerow(['UNIQUEID', 'TYPE', 'TRANSLATION_TIME', 'TRANSMITION_TIME',
                                  'NO_REQUESTS', 'TOTAL_JSON_SIZE'])
 
@@ -155,7 +155,7 @@ class OrionSink(GeneralSink):
 
         with open(self.metricspath, 'a+') as cvsfile:
             for t in translation.keys():
-                writer = csv.writer(csvfilfilee, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL))
+                writer = csv.writer(csvfilfilee, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 row = [snapshot['UNIQUEID'], t, translation_time[t], transmition_time[t],
                        len(tranlation_size[t]), sum(translation_size[t])]
                 writer.writerow(row)
