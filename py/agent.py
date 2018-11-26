@@ -15,7 +15,7 @@ if sys.version_info[0] < 3:
 else:
     import queue as Queue
     import configparser as ConfigParser
-from sources import SerialSource, FileSource, KafkaSource 
+from sources import SerialSource, FileSource, KafkaSource
 from sink import OrionSink
 from classification import TensorflowClassifier
 from camera import Camera
@@ -193,7 +193,6 @@ if __name__ == "__main__":
         # thread.start()
         writerThreadList.append(thread)
         threadID += 1
-
 
     while 1:
         if(camera and tfclassify):

@@ -3,8 +3,9 @@ import time
 import threading
 import datetime
 import requests
+import csv
 
-from utils import translate
+from utils import mesp_dm, ngsi_dm, ngsild_dm
 
 
 class GeneralSink(threading.Thread):
@@ -26,10 +27,6 @@ class GeneralSink(threading.Thread):
 
     def process_data(self, threadName, q, classf_table):
         req_bytes = dict()
-        req_bytes['raw'] = dict()
-        req_bytes['ngsi'] = dict()
-        req_bytes['json-ld'] = dict()
-        i = 1
         while not self.exitFlag:
             if not self.q.empty():
                 self.lock.acquire()
@@ -37,10 +34,7 @@ class GeneralSink(threading.Thread):
                 self.lock.release()
                 self.logger.debug("{} Got data {}".format(self.name, data))
                 self.logger.debug("Classification: {}".format(classf_table))
-                req_bytes['raw'][i] = self.raw_post(data, self.schema, classf_table)
-                req_bytes['ngsi'][i] = 0
-                req_bytes['json-ld'][i] = 0
-                i += 1
+                req_bytes = self.raw_post(data, self.schema, classf_table)
                 break
             else:
                 continue
@@ -59,8 +53,13 @@ class OrionSink(GeneralSink):
         GeneralSink.__init__(self, threadID, 'Orion', name, q, queuelock,
                              schema, logger)
         self.raw_post = self.posttoorion
-        self.cross_ref_unique_ids = []
         self.url = url
+        self.metricspath ='/home/pi/Desktop/ngsi-metrics.csv'
+        with open(self.metricspath, 'w+') as csvfile:
+                writer = csv.writer(csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL))
+                writer.writerow(['UNIQUEID', 'TYPE', 'TRANSLATION_TIME', 'TRANSMITION_TIME',
+                                 'NO_REQUESTS', 'TOTAL_JSON_SIZE'])
+
 
     def getfromorion_id(self, id):
         self.logger.debug("get from Orion!")
@@ -91,19 +90,9 @@ class OrionSink(GeneralSink):
 
         self.logger.debug("finished")
 
-    def retrieve_id(self):
-        for id in self.cross_ref_unique_ids:
-            self.logger.debug("retrieving : " + str(id))
-            res = self.getfromorion_id(id)
-            self.logger.debug(res['id'])
-            if res['id'] == id:
-                self.logger.debug("found")
-            else:
-                self.logger.debug("not found")
-
     def posttoorion(self, snapshot_raw, schema, classf_table):
         self.logger.info("Parsing data...")
-        self.logger.info(snapshot_raw)
+        # self.logger.info(snapshot_raw)
 
         batches = schema.split(';')[:-1]
         data = snapshot_raw.split(";")[:-1]
@@ -112,48 +101,64 @@ class OrionSink(GeneralSink):
             self.logger.debug("Schema and data format are not the same!")
             raise Exception("Schema and data format are not the same!")
 
-        experimental_results = {}
-        ts1_received = time.time()
-        experimental_results["ts1_received"] = ts1_received
-
         snapshot = {}
 
         for B, d in zip(batches, data):
-            snapshot[B.lower()] = d
+            #snapshot[B.lower().replace("#", "_")] = d
+            snapshot[B.replace("#", "_")] = d
 
         self.logger.info("Post to Orion!")
         self.logger.info(snapshot)
-        # print("TIME")
-        pts = datetime.datetime.now().strftime('%s')
-        # print(pts)
 
-        json = translate(snapshot, pts, classf_table, self.logger)
-        ts2 = time.time()
-        self.logger.debug(json)
+        # Timestampjust before the tranlation
+        before_trans_tmst = datetime.datetime.now()
+        # Translate on different models and post data to Orion
+        translation = dict()
+        # Keep time for each tranlation
+        translation_time = dict()
 
-        translation_time = ts2-ts1_received
-        volume = sys.getsizeof(json)
-        self.logger.debug("translation time")
-        self.logger.info("entity id, volume, translation_time")
-        self.logger.info("{}, {}, {}".format(str(pts), volume, translation_time))
+        tmmesp = time.time()
+        translation['mesp'] = mesp_dm(snapshot, classf_table,before_trans_tmst)
+        translation_time['mesp'] = time.time() - tmmesp
 
-        #json = json.loads(json)
+        tmngsi = time.time()
+        translation['ngsi'] = ngsi_dm(snapshot, classf_table,before_trans_tmst)
+        translation_time['ngsi'] = time.time() - tmngsi
 
+        tmngsild = time.time()
+        translation['ngsild'] = ngsild_dm(snapshot, classf_table,before_trans_tmst)
+        translation_time['ngsild'] = time.time() - tmngsild
+
+
+        # self.logger.info("Entity id: {}".format(str(tmst)))
+        transmition_time = dict()
+        translation_size = dict()
         if self.url:
             url = self.url + '/v2/entities'
-            headers = {'Accept': 'application/json', 'X-Auth-Token': 'QGIrJsK6sSyKfvZvnsza6DlgjSUa8t'}
+            headers = {'Accept': 'application/json'}
             sess = requests.Session()
-            req = requests.Request('POST', url=url, json=json)
-            preq = req.prepare()
-            json_size = len(preq.body)
-            response = sess.send(preq)
+            for t, l in translation.iteritems():
+                tnsm_time = time.time()
+                for json in l:
+                    req = requests.Request('POST', url=url, headers=headers, json=json)
+                    preq = req.prepare()
+                    self.logger.debug("size of request body sent for %s:" % t)
+                    self.logger.debug(len(preq.body))
+                    if t in translation_size:
+                        translation_size[t].append( len(preq.headers) + len(preq.body))
+                    else:
+                        translation_size[t] = [ len(preq.headers) + len(preq.body) ]
+                    response = sess.send(preq)
+                    transmition_time[t] = time.time() - tnsm_time
+                    self.logger.debug("Response")
+                    self.logger.debug(response.text)
 
-            self.logger.debug("response")
-            self.logger.debug(response.text)
+        with open(self.metricspath, 'a+') as cvsfile:
+            for t in translation.keys():
+                writer = csv.writer(csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL))
+                row = [snapshot['UNIQUEID'], t, translation_time[t], transmition_time[t],
+                       len(tranlation_size[t]), sum(translation_size[t])]
+                writer.writerow(row)
+                csvfile.flush()
 
-        self.cross_ref_unique_ids.append(str(pts))
-        self.logger.debug("list of ids translated and send:")
-        self.logger.debug(str(pts))
-        self.logger.debug("size of request body sent:")
-        self.logger.debug(json_size)
-        return json_size
+        return translation_size
