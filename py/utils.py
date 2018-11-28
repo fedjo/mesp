@@ -73,8 +73,8 @@ def ngsi_dm(snapshot_dict, classf_table, timestamp):
     TEMP_SOIL_1 = snapshot_dict["TEMP-SOIL_1"]
     HUMIDITY_1 = snapshot_dict["HUMIDITY_1"]
     TEMP_AIR_1 = snapshot_dict["TEMP-AIR_1"]
-    GPS_X = snapshot_dict["GPS_1"].split(',')[0]
-    GPS_Y = snapshot_dict["GPS_1"].split(',')[1]
+    GPS_X = float(snapshot_dict["GPS_1"].split(',')[0])
+    GPS_Y = float(snapshot_dict["GPS_1"].split(',')[1])
 
     json_airquality = {
         "id": "AirQualityObserved:ntua:" + UNIQUEID,
@@ -218,8 +218,8 @@ def ngsild_dm(snapshot_dict, classf_table, timestamp):
     TEMP_SOIL_1 = snapshot_dict["TEMP-SOIL_1"]
     HUMIDITY_1 = snapshot_dict["HUMIDITY_1"]
     TEMP_AIR_1 = snapshot_dict["TEMP-AIR_1"]
-    GPS_X = snapshot_dict["GPS_1"].split(',')[0]
-    GPS_Y = snapshot_dict["GPS_1"].split(',')[1]
+    GPS_X = float(snapshot_dict["GPS_1"].split(',')[0])
+    GPS_Y = float(snapshot_dict["GPS_1"].split(',')[1])
 
     json_airquality = {"@context": [
         "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
