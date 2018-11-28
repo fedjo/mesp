@@ -103,8 +103,12 @@ if __name__ == "__main__":
     journald_handler.setFormatter(logging.Formatter(
             '[%(levelname)s] %(message)s'
     ))
+    logfile = '/home/pi/Desktop/agent.log'
+    # Truncate before log
+    with open(logfile, 'w') as log:
+        pass
     # create file handler which logs even debug messages
-    file_handler = logging.FileHandler('/home/pi/Desktop/agent.log')
+    file_handler = logging.FileHandler(logfile)
     file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
     # add the journald handler to the current logger
     logger.addHandler(journald_handler)
