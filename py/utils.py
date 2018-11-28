@@ -1,5 +1,6 @@
 import requests
 import logging
+import datetime
 
 
 def calltoopenweathermap():
@@ -10,11 +11,11 @@ def calltoopenweathermap():
     logging.debug(response.json())
 
 
-def meps_dm(snapshot_dict, classf_table, timestamp):
+def mesp_dm(snapshot_dict, classf_table, timestamp):
 
     json = {
 
-        "id": snapshot_dict("UNIQUEID"),
+        "id": snapshot_dict["UNIQUEID"],
         "type": "MespMeasurement",
         "translation_timestamp": {
             "value": timestamp.strftime('%s'),
@@ -35,7 +36,9 @@ def meps_dm(snapshot_dict, classf_table, timestamp):
             'epoch': 'time'
     }
     for k,v in snapshot_dict.iteritems():
-        k = k.toLower()
+        if '_' in k:
+            k = k[:-2]
+        k = k.lower()
         if 'gps' in k:
             k = 'gps_location'
         #if 'epoch' in k:
@@ -59,19 +62,19 @@ def meps_dm(snapshot_dict, classf_table, timestamp):
 def ngsi_dm(snapshot_dict, classf_table, timestamp):
 
     #UNIQUEID = timestamp.strftime('%s')
-    UNIQUEID = snapshot_dict("UNIQUEID")
+    UNIQUEID = snapshot_dict["UNIQUEID"]
     #EPOCH = snapshot_dict("EPOCH")
-    EPOCH = str(datetime.datetime.utcfromtimestamp(int(snapshot_dict("EPOCH"))))
-    GAS_1 = snapshot_dict("GAS_1")
-    FLAME_1 = snapshot_dict("FLAME_1")
-    FLAME_2 = snapshot_dict("FLAME_2")
-    FLAME_3 = snapshot_dict("FLAME_3")
-    FLAME_4 = snapshot_dict("FLAME_4")
-    TEMP_SOIL_1 = snapshot_dict("TEMP-SOIL_1")
-    HUMIDITY_1 = snapshot_dict("HUMIDITY_1")
-    TEMP_AIR_1 = snapshot_dict("TEMP-AIR_1")
-    GPS_X = float(snapshot_dict("GPS_1").split(',')[0])
-    GPS_Y = float(snapshot_dict("GPS_1").split(',')[1])
+    EPOCH = str(datetime.datetime.utcfromtimestamp(int(snapshot_dict["EPOCH"])))
+    GAS_1 = snapshot_dict["GAS_1"]
+    FLAME_0 = snapshot_dict["FLAME_0"]
+    FLAME_1 = snapshot_dict["FLAME_1"]
+    FLAME_2 = snapshot_dict["FLAME_2"]
+    FLAME_3 = snapshot_dict["FLAME_3"]
+    TEMP_SOIL_1 = snapshot_dict["TEMP-SOIL_1"]
+    HUMIDITY_1 = snapshot_dict["HUMIDITY_1"]
+    TEMP_AIR_1 = snapshot_dict["TEMP-AIR_1"]
+    GPS_X = snapshot_dict["GPS_1"].split(',')[0]
+    GPS_Y = snapshot_dict["GPS_1"].split(',')[1]
 
     json_airquality = {
         "id": "AirQualityObserved:ntua:" + UNIQUEID,
@@ -183,7 +186,7 @@ def ngsi_dm(snapshot_dict, classf_table, timestamp):
                 "type": "Number"
             },
             "refAirQualityObserved": {
-                "value": "AirQualityObserved:ntua:" + UNIQUEID
+                "value": "AirQualityObserved:ntua:" + UNIQUEID,
                 "type": "Reference"
             },
             "refAlert": {
@@ -205,18 +208,18 @@ def ngsi_dm(snapshot_dict, classf_table, timestamp):
 def ngsild_dm(snapshot_dict, classf_table, timestamp):
 
     UNIQUEID = timestamp.strftime('%s')
-    UNIQUEID = snapshot_dict("UNIQUEID")
-    EPOCH = str(datetime.datetime.utcfromtimestamp(int(snapshot_dict("EPOCH"))))
-    GAS_1 = snapshot_dict("GAS_1")
-    FLAME_1 = snapshot_dict("FLAME_1")
-    FLAME_2 = snapshot_dict("FLAME_2")
-    FLAME_3 = snapshot_dict("FLAME_3")
-    FLAME_4 = snapshot_dict("FLAME_4")
-    TEMP_SOIL_1 = snapshot_dict("TEMP-SOIL_1")
-    HUMIDITY_1 = snapshot_dict("HUMIDITY_1")
-    TEMP_AIR_1 = snapshot_dict("TEMP-AIR_1")
-    GPS_X = float(snapshot_dict("GPS_1").split(',')[0])
-    GPS_Y = float(snapshot_dict("GPS_1").split(',')[1])
+    UNIQUEID = snapshot_dict["UNIQUEID"]
+    EPOCH = str(datetime.datetime.utcfromtimestamp(int(snapshot_dict["EPOCH"])))
+    GAS_1 = snapshot_dict["GAS_1"]
+    FLAME_0 = snapshot_dict["FLAME_0"]
+    FLAME_1 = snapshot_dict["FLAME_1"]
+    FLAME_2 = snapshot_dict["FLAME_2"]
+    FLAME_3 = snapshot_dict["FLAME_3"]
+    TEMP_SOIL_1 = snapshot_dict["TEMP-SOIL_1"]
+    HUMIDITY_1 = snapshot_dict["HUMIDITY_1"]
+    TEMP_AIR_1 = snapshot_dict["TEMP-AIR_1"]
+    GPS_X = snapshot_dict["GPS_1"].split(',')[0]
+    GPS_Y = snapshot_dict["GPS_1"].split(',')[1]
 
     json_airquality = {"@context": [
         "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
@@ -333,7 +336,7 @@ def ngsild_dm(snapshot_dict, classf_table, timestamp):
 
 
             "dateObserved": {
-                "value": EPOCH
+                "value": EPOCH,
                 "type": "date"
             },
 

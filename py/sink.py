@@ -92,7 +92,7 @@ class OrionSink(GeneralSink):
 
     def posttoorion(self, snapshot_raw, schema, classf_table):
         self.logger.info("Parsing data...")
-        # self.logger.info(snapshot_raw)
+        self.logger.info(snapshot_raw)
 
         batches = schema.split(';')[:-1]
         data = snapshot_raw.split(";")[:-1]
@@ -155,7 +155,7 @@ class OrionSink(GeneralSink):
 
         with open(self.metricspath, 'a+') as cvsfile:
             for t in translation.keys():
-                writer = csv.writer(csvfilfilee, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 row = [snapshot['UNIQUEID'], t, translation_time[t], transmition_time[t],
                        len(tranlation_size[t]), sum(translation_size[t])]
                 writer.writerow(row)
