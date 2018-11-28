@@ -153,6 +153,44 @@ def ngsi_dm(snapshot_dict, classf_table, timestamp):
         }
     }
 
+
+    json_forest_fire_image = {
+        "id": "Alert:security:forestFireImage:" + UNIQUEID,
+        "type": "Alert",
+        "category": {
+            "value": "security",
+            "type": "text"
+        },
+        "subCategory": {
+            "value": "forestFire",
+            "type": "text"
+        },
+        "severity": {
+            "value": str(classf_table["field fire"]),
+            "type": "text"
+        },
+        "location": {
+            "value": {
+                "type": "Point",
+                "coordinates": [GPS_X,GPS_Y]
+            },
+            "type": "geo:json"
+        },
+        "dateIssued": {
+            "value": str(timestamp),
+            "type": "date"
+        },
+        "description": {
+            "value": "forest fire detected in the area of xxxx",
+            "type": "text"
+        },
+        "alertSource": {
+            "value": "Based on iMESP image classification engine",
+            "type": "text"
+        }
+    }
+
+
     json_greenspace = {
             "id": "Greenspace:rafina:1" + UNIQUEID,
             "type": "GreenspaceRecord",
@@ -202,7 +240,7 @@ def ngsi_dm(snapshot_dict, classf_table, timestamp):
     }
 
 
-    return [json_airquality, json_forest_fire, json_greenspace]
+    return [json_airquality, json_forest_fire, json_forest_fire_image, json_greenspace]
 
 
 def ngsild_dm(snapshot_dict, classf_table, timestamp):
@@ -315,6 +353,49 @@ def ngsild_dm(snapshot_dict, classf_table, timestamp):
     }
 
 
+    json_forest_fire_image ={"@context": [
+        "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
+        "https://raw.githubusercontent.com/nikoskal/mesp/mdpi/etsi_ngsild_datamodels/specs/Alert/schema.json"
+        ],
+        "id": "urn:ngsi-ld:Alert:security:image:"+UNIQUEID,
+        "type": "Alert",
+        "source": "GSMA",
+        "dataProvider": "GSMA",
+        "entityVersion": 2.0,
+
+        "category": {
+            "type": "Property",
+            "value": "security"
+        },
+        "subCategory": {
+            "value": "forestFire",
+            "type": "text"
+        },
+        "severity": {
+            "value": str(classf_table["field fire"]),
+            "type": "text"
+        },
+        "location": {
+            "value": {
+                "type": "Point",
+                "coordinates": [GPS_X,GPS_Y]
+            },
+            "type": "geo:json"
+        },
+        "dateIssued": {
+            "value": str(timestamp),
+            "type": "date"
+        },
+        "description": {
+            "value": "forest fire detected in the area of xxxx",
+            "type": "text"
+        },
+        "alertSource": {
+            "value": "Based on iMESP image classification engine",
+            "type": "text"
+        }
+    }
+
     json_greenspace = {"@context": [
         "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
         "https://raw.githubusercontent.com/GSMADeveloper/NGSI-LD-Entities/master/examples/Agri-Parcel-Record-context.jsonld"
@@ -374,4 +455,4 @@ def ngsild_dm(snapshot_dict, classf_table, timestamp):
                 "type": "Reference"
             }
     }
-    return [json_airquality , json_forest_fire, json_greenspace]
+    return [json_airquality , json_forest_fire, json_forest_fire_image, json_greenspace]

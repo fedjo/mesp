@@ -118,11 +118,11 @@ class OrionSink(GeneralSink):
         translation_time = dict()
 
         tmmesp = time.time()
-        translation['mesp'] = mesp_dm(snapshot, classf_table,before_trans_tmst)
+        translation['mesp'] = mesp_dm(snapshot, classf_table, before_trans_tmst)
         translation_time['mesp'] = time.time() - tmmesp
 
         tmngsi = time.time()
-        translation['ngsi'] = ngsi_dm(snapshot, classf_table,before_trans_tmst)
+        translation['ngsi'] = ngsi_dm(snapshot, classf_table, before_trans_tmst)
         translation_time['ngsi'] = time.time() - tmngsi
 
         tmngsild = time.time()
