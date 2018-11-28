@@ -10,10 +10,7 @@ ser = serial.Serial(
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
-    timeoule 1:
-                   ser.write('Write counter: %d \n'%(counter))
-                                  time.sleep(1)
-                                                 counter += 1t=1
+    timeout=1
 )
 counter=0
 
