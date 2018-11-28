@@ -28,9 +28,8 @@ class GeneralSource(threading.Thread):
         while not self.exitFlag:
             try:
                 if isinstance(self.istr, (Serial, file)):
-                    line = self.istr.readline()
-                    # istr.reset_input_buffer()
                     try:
+                        self.istr.reset_input_buffer()
                         self.istr.flushInput()
                         self.istr.flushOutput()
                     except AttributeError as ae:
@@ -38,6 +37,7 @@ class GeneralSource(threading.Thread):
                     # if line:
                     # if findWholeWord('UNIQUEDID'):
 
+                    line = self.istr.readline()
                     if not line:
                         continue
 
