@@ -48,17 +48,17 @@ class GeneralSink(threading.Thread):
 
 class OrionSink(GeneralSink):
 
-    def __init__(self, threadID, name, q, queuelock, url, schema, logger):
+    def __init__(self, threadID, name, q, queuelock, url, schema, metricspath, logger):
         self.logger = logger
         GeneralSink.__init__(self, threadID, 'Orion', name, q, queuelock,
                              schema, logger)
         self.raw_post = self.posttoorion
         self.url = url
-        self.metricspath ='/home/pi/Desktop/ngsi-metrics.csv'
+        self.metricspath = metricspath
         with open(self.metricspath, 'w+') as csvfile:
                 writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                writer.writerow(['UNIQUEID', 'TYPE', 'TRANSLATION_TIME', 'TRANSMITION_TIME',
-                                 'NO_REQUESTS', 'TOTAL_JSON_SIZE'])
+                writer.writerow(['TIMESTAMP','UNIQUEID', 'TYPE', 'TRANSLATION_TIME',
+                                 'TRANSMITION_TIME', 'NO_REQUESTS', 'TOTAL_JSON_SIZE'])
 
 
     def getfromorion_id(self, id):
@@ -156,7 +156,8 @@ class OrionSink(GeneralSink):
         with open(self.metricspath, 'a+') as cvsfile:
             for t in translation.keys():
                 writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                row = [snapshot['UNIQUEID'], t, translation_time[t], transmition_time[t],
+                row = [str(datetime.datetime.now()), snapshot['UNIQUEID'], t,
+                       translation_time[t], transmition_time[t],
                        len(tranlation_size[t]), sum(translation_size[t])]
                 writer.writerow(row)
                 csvfile.flush()

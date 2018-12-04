@@ -28,7 +28,6 @@ class ConsumptionSource(threading.Thread):
                 writer.writerow([str(datetime.datetime.now()), self.load_voltage,
                                self.current, self.power])
                 csvfile.flush()
-                time.sleep(2)
 
 
 if __name__ == "__main__":

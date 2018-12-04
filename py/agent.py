@@ -95,6 +95,14 @@ if __name__ == "__main__":
 
     args = _setup_argparser()
 
+    config =  ConfigParser.ConfigParser()
+    config.read(args.config_file)
+    SERIAL = lambda p: config.get('SERIAL', p)
+    KAFKA = lambda p: config.get('KAFKA', p)
+    ORION = lambda p: config.get('ORION', p)
+    CLASSFCTN = lambda p: config.get('CLASSIFICATION', p)
+    LOG = lambda p: config.get('LOG', p)
+
     # Add a logger
     logger = logging.getLogger(__name__)
     # instantiate the JournaldLogHandler to hook into systemd
@@ -103,7 +111,7 @@ if __name__ == "__main__":
     journald_handler.setFormatter(logging.Formatter(
             '[%(levelname)s] %(message)s'
     ))
-    logfile = '/home/pi/Desktop/agent.log'
+    logfile = LOG('LOGFILE')
     # Truncate before log
     with open(logfile, 'w') as log:
         pass
@@ -118,13 +126,6 @@ if __name__ == "__main__":
         logger.setLevel(logging.INFO)
     else:
         logger.setLevel(logging.DEBUG)
-
-    config =  ConfigParser.ConfigParser()
-    config.read(args.config_file)
-    SERIAL = lambda p: config.get('SERIAL', p)
-    KAFKA = lambda p: config.get('KAFKA', p)
-    ORION = lambda p: config.get('ORION', p)
-    CLASSFCTN = lambda p: config.get('CLASSIFICATION', p)
 
     if args.tensorflow:
         camera = Camera(CLASSFCTN('IMAGES_DIR'), logger)
@@ -193,7 +194,7 @@ if __name__ == "__main__":
     writerThreadList = []
     for i in range(args.write_threads):
         tname = "Writer-%d" % i
-        thread = sink(threadID, tname, workQueue, queueLock, _url, schema, logger)
+        thread = sink(threadID, tname, workQueue, queueLock, _url, schema, LOG('METRICSFILE'), logger)
         # thread.start()
         writerThreadList.append(thread)
         threadID += 1
