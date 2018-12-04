@@ -158,7 +158,7 @@ class OrionSink(GeneralSink):
                 writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 row = [str(datetime.datetime.now()), snapshot['UNIQUEID'], t,
                        translation_time[t], transmition_time[t],
-                       len(tranlation_size[t]), sum(translation_size[t])]
+                       len(translation_size[t]), sum(translation_size[t])]
                 writer.writerow(row)
                 csvfile.flush()
 
