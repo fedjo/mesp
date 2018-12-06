@@ -3,18 +3,17 @@
 import os
 import platform
 import threading
-import logging
 import sys
 import time
 import re
 import argparse
-from systemd.journal import JournaldLogHandler
 if sys.version_info[0] < 3:
     import Queue
     import ConfigParser
 else:
     import queue as Queue
     import configparser as ConfigParser
+from log import setup_logger, logger
 from sources import SerialSource, FileSource, KafkaSource
 from sink import OrionSink
 from classification import TensorflowClassifier
@@ -43,25 +42,9 @@ def _setup_argparser():
     gen_opts.add_argument("--version",
                           help="print version information and exit",
                           action="store_true")
-    gen_opts.add_argument("-q", "--quiet",
-                          help="quiet mode, print no warnings and errors",
-                          action="store_true")
-    gen_opts.add_argument("-v", "--verbose",
-                          help="verbose mode, print processing details",
-                          action="store_true")
     gen_opts.add_argument("-d", "--debug",
                           help="debug mode, print debug information",
                           action="store_true")
-    gen_opts.add_argument("-ll", "--log-level", metavar='[l]',
-                          help="use level l for the logger"
-                               "(fatal, error, warn, "
-                               "info, debug, trace)",
-                          type=str,
-                          choices=['fatal', 'error', 'warn',
-                                   'info', 'debug', 'trace'])
-    gen_opts.add_argument("-lc", "--log-config", metavar='[f]',
-                          help="use config file f for the logger",
-                          type=str)
 
     # Process Options
     pr_opts = parser.add_argument_group('Process Options')
@@ -73,16 +56,6 @@ def _setup_argparser():
                           help="How many threads to run as writers",
                           type=int,
                           default=1)
-    pr_opts.add_argument("-usb", "--usb-port", metavar='[u]sbport',
-                          help="Which usb port to read from",
-                          type=int,
-                          default=0)
-    pr_opts.add_argument("-kf", "--kafka-url", metavar='[k]afka-url',
-                          help="Where Kafka server is located",
-                          type=str)
-    pr_opts.add_argument("-kt", "--kafka-topic", metavar='[k]afka-topic',
-                          help="Topic to consume from",
-                          type=str)
     pr_opts.add_argument("-tf", "--tensorflow",
                          help="Classification using Tensorflow",
                          action="store_true")
@@ -103,35 +76,17 @@ if __name__ == "__main__":
     CLASSFCTN = lambda p: config.get('CLASSIFICATION', p)
     LOG = lambda p: config.get('LOG', p)
 
-    # Add a logger
-    logger = logging.getLogger(__name__)
-    # instantiate the JournaldLogHandler to hook into systemd
-    journald_handler = JournaldLogHandler()
-    # set a formatter to include the level name
-    journald_handler.setFormatter(logging.Formatter(
-            '[%(levelname)s] %(message)s'
-    ))
-    logfile = LOG('LOGFILE')
-    # Truncate before log
-    with open(logfile, 'w') as log:
-        pass
-    # create file handler which logs even debug messages
-    file_handler = logging.FileHandler(logfile)
-    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-    # add the journald handler to the current logger
-    logger.addHandler(journald_handler)
-    logger.addHandler(file_handler)
-    # optionally set the logging level
-    if args.log_level:
-        logger.setLevel(logging.INFO)
+    # set the logging level
+    if args.debug:
+        setup_logger(logfile=LOG('LOGFILE'), loglevel=10)
     else:
-        logger.setLevel(logging.DEBUG)
+        setup_logger(logfile=LOG('LOGFILE'))
+    LOGGER = logger(__name__)
 
     if args.tensorflow:
-        camera = Camera(CLASSFCTN('IMAGES_DIR'), logger)
-        tfclassify = TensorflowClassifier(2, CLASSFCTN('LABELS'),
-                                          CLASSFCTN('FROZEN_GRAPH'),
-                                          camera, logger)
+        camera = Camera(CLASSFCTN('IMAGES_DIR'))
+        tfclassify = TensorflowClassifier(CLASSFCTN('LABELS'),
+                                          CLASSFCTN('FROZEN_GRAPH'))
 
     _url = ORION('BROKER')
     if config.has_option('SERIAL', 'USB_PORT'):
@@ -145,12 +100,12 @@ if __name__ == "__main__":
     elif config.has_option('KAFKA', 'BROKER'):
         (os, ver, _) = platform.linux_distribution()
         if( os != 'debian' or float(ver) < 9.0):
-            logger.error("OS version does not support Kafka consumer.")
-            logger.error("Please upgrade to Debian version >=9 (Stretch).")
+            LOGGER.error("OS version does not support Kafka consumer.")
+            LOGGER.error("Please upgrade to Debian version >=9 (Stretch).")
             sys.exit(-1)
         # Check for essential parameters
         if not(KAFKA('BROKER') or KAFKA('GROUP') or KAFKA('TOPIC')):
-            logger.debug("Please specify all the parameters BROKER/GROUP/TOPIC for Kafka")
+            LOGGER.debug("Please specify all the parameters BROKER/GROUP/TOPIC for Kafka")
             sys.exit(-1)
 
         source = KafkaSource
@@ -158,35 +113,29 @@ if __name__ == "__main__":
         lconfig = KAFKA
         #client = KafkaClient(hosts=args.kafka_url)
     else:
-        logger.debug("Configuration file does not provide any input stream")
-        logger.debug("Please provide one of the following inputs:")
-        logger.debug("SERIAL/KAFKA")
+        LOGGER.debug("Configuration file does not provide any input stream")
+        LOGGER.debug("Please provide one of the following inputs:")
+        LOGGER.debug("SERIAL/KAFKA")
         sys.exit(-1)
 
     queueLock = threading.Lock()
     workQueue = Queue.Queue()
     threadID = 1
 
-    try:
-        logger.info("Reading schema of data...")
-        while True:
-            # schema = istream.readline();
-            schema = SERIAL('SCHEMA')
-            if not schema:
-                continue
-            else:
-                logger.info(schema)
-                break
-        logger.debug("Starting receiving data...")
-    except Exception as e:
-        logger.debug("Could not read schema!")
+    LOGGER.info("Reading schema of data...")
+    schema = SERIAL('SCHEMA')
+    if not schema:
+        LOGGER.debug("Could not read schema!")
         sys.exit(-1)
+    else:
+        LOGGER.info(schema)
+    LOGGER.info("Starting receiving data...")
 
     # Create new threads
     readerThreadList = []
     for i in range(args.read_threads):
         tname = "Reader-%d" % i
-        thread = source(threadID, tname, workQueue, queueLock, lconfig, logger)
+        thread = source(threadID, tname, workQueue, queueLock, lconfig)
         # thread.start()
         readerThreadList.append(thread)
         threadID += 1
@@ -194,7 +143,7 @@ if __name__ == "__main__":
     writerThreadList = []
     for i in range(args.write_threads):
         tname = "Writer-%d" % i
-        thread = sink(threadID, tname, workQueue, queueLock, _url, schema, LOG('METRICSFILE'), logger)
+        thread = sink(threadID, tname, workQueue, queueLock, _url, schema, LOG('METRICSFILE'))
         # thread.start()
         writerThreadList.append(thread)
         threadID += 1
@@ -206,11 +155,11 @@ if __name__ == "__main__":
                len(writerThreadList) > 0):
                 readerThreadList[0]._read_data()
                 body_sizes = writerThreadList[0]._process_data(top_k)
-                logger.info(body_sizes)
+                LOGGER.info(body_sizes)
                 time.sleep(45)
 
 
     # Wait for threads to complete
     for t in threads:
         t.join()
-    logger.info("Exiting Main thread!")
+    LOGGER.info("Exiting Main thread!")
