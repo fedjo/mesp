@@ -1,21 +1,21 @@
 import os
 import threading
-import logging
 import tensorflow as tf
+
+from log import logger
+
+
+LOGGER = logger(__name__)
 
 
 class TensorflowClassifier(threading.Thread):
 
-    def __init__(self, ll, labels, graph, camera, logger):
+    def __init__(self, labels, graph):
         threading.Thread.__init__(self)
         # Just disables the warning, doesn't enable AVX/FMA
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(ll)
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(2)
 
-        # Keep the camera instance
-        self.camera = camera
-        self.logger = logger
-
-        # Loads label file, strips off carriage return
+        # Loads label file, strips ocarriaga return
         self.label_lines = [line.rstrip() for line
             in tf.gfile.GFile(labels)]
 
@@ -38,7 +38,7 @@ class TensorflowClassifier(threading.Thread):
         with tf.Session() as sess:
             softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
             predictions = sess.run(softmax_tensor,{'DecodeJpeg/contents:0': image_data})
-            self.logger.debug(predictions)
+            LOGGER.debug(predictions)
             # Sort to show labels of first prediction in order of confidence
             top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
             info_table = dict()
@@ -46,6 +46,6 @@ class TensorflowClassifier(threading.Thread):
                 human_string = self.label_lines[node_id]
                 score = predictions[0][node_id]
                 info_table[human_string] = score
-                # self.logger.info('%s (score = %.5f)' % (human_string, score))
+                LOGGER.debug('%s (score = %.5f)' % (human_string, score))
 
         return info_table

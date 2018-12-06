@@ -1,14 +1,17 @@
 import requests
-import logging
 import datetime
+
+from log import logger
+
+LOGGER = logger(__name__)
 
 
 def calltoopenweathermap():
-    logging.debug("Goodbye, World!")
+    LOGGER.debug("Goodbye, World!")
     weather_url = 'http://api.openweathermap.org/data/2.5/forecast?lat=38.303860&lon=23.730180&cnt=5&appid=3a87a263c645ea5eb18ad7417be4cb0d'
-    logging.debug(weather_url)
+    LOGGER.debug(weather_url)
     response = requests.post(weather_url)
-    logging.debug(response.json())
+    LOGGER.debug(response.json())
 
 
 def mesp_dm(snapshot_dict, classf_table, timestamp):

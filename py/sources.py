@@ -8,9 +8,12 @@ from confluent_kafka import Consumer, KafkaError
 from confluent_kafka.avro import AvroConsumer
 from confluent_kafka.avro.serializer import SerializerError
 
+from log import logger
+
+LOGGER = logger(__name__)
 
 class GeneralSource(threading.Thread):
-    def __init__(self, threadID, stype, name, q, queuelock, istr, logger):
+    def __init__(self, threadID, stype, name, q, queuelock, istr):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.stype = stype
@@ -18,7 +21,6 @@ class GeneralSource(threading.Thread):
         self.q = q
         self.lock = queuelock
         self.istr = istr
-        self.logger = logger
         self.exitFlag = 0
 
     def _read_data(self):
@@ -47,7 +49,7 @@ class GeneralSource(threading.Thread):
                     try:
                         msg = self.istr.poll(10)
                     except SerializerError as e:
-                        self.logger.error("Message deserialization failed for {}: {}".format(msg, e))
+                        LOGGER.error("Message deserialization failed for {}: {}".format(msg, e))
                         break
 
                     if not msg:
@@ -56,29 +58,29 @@ class GeneralSource(threading.Thread):
                         if msg.error().code() == KafkaError._PARTITION_EOF:
                             continue
                         else:
-                            self.logger.debug(msg.error())
+                            LOGGER.debug(msg.error())
                             break
 
                     data = msg.value()
-                    self.logger.debug(data)
+                    LOGGER.debug(data)
 
                 self.lock.acquire()
                 self.q.put(data[0])
                 self.lock.release()
                 break
             except IOError as io:
-                self.logger.debug(io)
+                LOGGER.debug(io)
 
 
     def run(self):
-        self.logger.info("Starting %s %s" % (self.stype, self.name))
+        LOGGER.info("Starting %s %s" % (self.stype, self.name))
         self.read_data(self.name, self.q, self.istr)
-        self.logger.info("Exiting %s %s" % (self.stype, self.name))
+        LOGGER.info("Exiting %s %s" % (self.stype, self.name))
 
 
 class SerialSource(GeneralSource):
 
-    def __init__(self, threadID, name, q, queuelock, lconfig, logger):
+    def __init__(self, threadID, name, q, queuelock, lconfig):
         istream = serial.Serial(
                 '/dev/ttyUSB' + lconfig('USB_PORT'),
                 baudrate=38400,
@@ -89,27 +91,27 @@ class SerialSource(GeneralSource):
                 xonxoff=False
         )
         GeneralSource.__init__(self, threadID, 'Serial', name, q, queuelock,
-                               istream, logger)
+                               istream)
 
 
 class FileSource(GeneralSource):
 
-    def __init__(self, threadID, name, q, queuelock, lconfig, logger):
+    def __init__(self, threadID, name, q, queuelock, lconfig):
         istream = open(lconfig('FILE'), 'r')
         GeneralSource.__init__(self, threadID, 'File', name, q, queuelock,
-                               istream, logger)
+                               istream)
 
 
 class KafkaSource(GeneralSource):
 
-    def __init__(self, threadID, name, q, queuelock, lconfig, logger):
+    def __init__(self, threadID, name, q, queuelock, lconfig):
         if lconfig('SCHEMA'):
             c = AvroConsumer({
                 'bootstrap.servers': lconfig('BROKER'),
                 'group.id': lconfig('GROUP'),
                 'schema.registry.url': lconfig('SCHEMA')
                 })
-            logger.debug("Avro Consumer")
+            LOGGER.debug("Avro Consumer")
         else:
             c = Consumer({
                 'bootstrap.servers': lconfig('BROKER'),
@@ -119,4 +121,4 @@ class KafkaSource(GeneralSource):
         c.subscribe(lconfig('TOPIC').split(','))
         istream = c
         GeneralSource.__init__(self, threadID, 'Kafka', name, q, queuelock,
-                               istream, logger)
+                               istream)

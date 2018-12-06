@@ -1,16 +1,17 @@
-import logging
 from picamera import PiCamera
 from time import sleep
 
+from log import logger
+
+
+LOGGER = logger(__name__)
 
 class Camera():
 
-    def __init__(self, imgdir, logger):
+    def __init__(self, imgdir):
         self.camera = PiCamera()
         self.idx = 0
         self.imgdir = imgdir
-        self.logger = logger 
-
 
     def capture(self):
 
@@ -19,6 +20,6 @@ class Camera():
         # sleep(5)
         self.camera.capture(imgpath)
         # self.camera.stop_preview()
-        self.logger.debug("Captured image: %s" % imgpath)
+        LOGGER.debug("Captured image: %s" % imgpath)
         self.idx += 1
         return imgpath
