@@ -1,6 +1,4 @@
 import threading
-import time
-import datetime
 
 import serial
 from serial.serialposix import Serial
@@ -9,8 +7,11 @@ from confluent_kafka.avro import AvroConsumer
 from confluent_kafka.avro.serializer import SerializerError
 
 from log import logger
+from agent import CAM, FIRECLF
+
 
 LOGGER = logger(__name__)
+
 
 class GeneralSource(threading.Thread):
     def __init__(self, threadID, stype, name, q, queuelock, istr):
@@ -23,12 +24,14 @@ class GeneralSource(threading.Thread):
         self.istr = istr
         self.exitFlag = 0
 
-    def _read_data(self):
-        self.read_data(self.name, self.q, self.istr)
-
     def read_data(self, threadName, q, istr):
         while not self.exitFlag:
             try:
+
+                rawdata = dict()
+                if FIRECLF:
+                    rawdata = FIRECLF.classify(CAM.capture())
+
                 if isinstance(self.istr, (Serial, file)):
                     try:
                         self.istr.reset_input_buffer()
@@ -43,13 +46,14 @@ class GeneralSource(threading.Thread):
                     if not line:
                         continue
 
-                    data = line.split()
+                    data = line.split()[0]
 
                 if isinstance(self.istr, Consumer):
                     try:
                         msg = self.istr.poll(10)
                     except SerializerError as e:
-                        LOGGER.error("Message deserialization failed for {}: {}".format(msg, e))
+                        LOGGER.error("Cannot deserialise message {}: {}"
+                                     .format(msg, e))
                         break
 
                     if not msg:
@@ -64,13 +68,14 @@ class GeneralSource(threading.Thread):
                     data = msg.value()
                     LOGGER.debug(data)
 
+                # Merge classification result with data
+                rawdata['raw'] = data
+
                 self.lock.acquire()
-                self.q.put(data[0])
+                self.q.put(rawdata)
                 self.lock.release()
-                break
             except IOError as io:
                 LOGGER.debug(io)
-
 
     def run(self):
         LOGGER.info("Starting %s %s" % (self.stype, self.name))
@@ -82,13 +87,13 @@ class SerialSource(GeneralSource):
 
     def __init__(self, threadID, name, q, queuelock, lconfig):
         istream = serial.Serial(
-                '/dev/ttyUSB' + lconfig('USB_PORT'),
-                baudrate=38400,
-                timeout=2,
-                bytesize=serial.EIGHTBITS,
-                parity=serial.PARITY_NONE,
-                stopbits=serial.STOPBITS_ONE,
-                xonxoff=False
+            '/dev/ttyUSB' + lconfig('USB_PORT'),
+            baudrate=38400,
+            timeout=2,
+            bytesize=serial.EIGHTBITS,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
+            xonxoff=False
         )
         GeneralSource.__init__(self, threadID, 'Serial', name, q, queuelock,
                                istream)
@@ -110,14 +115,14 @@ class KafkaSource(GeneralSource):
                 'bootstrap.servers': lconfig('BROKER'),
                 'group.id': lconfig('GROUP'),
                 'schema.registry.url': lconfig('SCHEMA')
-                })
+            })
             LOGGER.debug("Avro Consumer")
         else:
             c = Consumer({
                 'bootstrap.servers': lconfig('BROKER'),
                 'group.id': lconfig('GROUP'),
                 'auto.offset.reset': 'earliest'
-                })
+            })
         c.subscribe(lconfig('TOPIC').split(','))
         istream = c
         GeneralSource.__init__(self, threadID, 'Kafka', name, q, queuelock,

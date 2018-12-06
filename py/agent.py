@@ -1,4 +1,9 @@
 #!/usr/bin/python
+from log import setup_logger, logger
+from sources import SerialSource, FileSource, KafkaSource
+from sink import OrionSink
+from classification import TensorflowClassifier
+from camera import Camera
 
 import os
 import platform
@@ -13,11 +18,10 @@ if sys.version_info[0] < 3:
 else:
     import queue as Queue
     import configparser as ConfigParser
-from log import setup_logger, logger
-from sources import SerialSource, FileSource, KafkaSource
-from sink import OrionSink
-from classification import TensorflowClassifier
-from camera import Camera
+
+
+CAM = None
+FIRECLF = None
 
 
 def findWholeWord(w):
@@ -29,8 +33,8 @@ def _setup_argparser():
     # Description
     parser = argparse.ArgumentParser(
         description="The agent.py application implements a non-blocking reader"
-                    "on serial usb port or a Kafka server, a translator of the "
-                    "data parsed and a writer to web ContextBroker (Orion)",
+                    "on serial usb port or a Kafka server, a translator of the"
+                    " data parsed and a writer to web ContextBroker (Orion)",
         usage="agent.py [options] input_stream service_location")
 
     # General Options
@@ -49,13 +53,13 @@ def _setup_argparser():
     # Process Options
     pr_opts = parser.add_argument_group('Process Options')
     pr_opts.add_argument("-rt", "--read-threads", metavar='[r]ead',
-                          help="How many threads to run as readers",
-                          type=int,
-                          default=1)
+                         help="How many threads to run as readers",
+                         type=int,
+                         default=1)
     pr_opts.add_argument("-wt", "--write-threads", metavar='[w]rite',
-                          help="How many threads to run as writers",
-                          type=int,
-                          default=1)
+                         help="How many threads to run as writers",
+                         type=int,
+                         default=1)
     pr_opts.add_argument("-tf", "--tensorflow",
                          help="Classification using Tensorflow",
                          action="store_true")
@@ -68,13 +72,23 @@ if __name__ == "__main__":
 
     args = _setup_argparser()
 
-    config =  ConfigParser.ConfigParser()
+    config = ConfigParser.ConfigParser()
     config.read(args.config_file)
-    SERIAL = lambda p: config.get('SERIAL', p)
-    KAFKA = lambda p: config.get('KAFKA', p)
-    ORION = lambda p: config.get('ORION', p)
-    CLASSFCTN = lambda p: config.get('CLASSIFICATION', p)
-    LOG = lambda p: config.get('LOG', p)
+
+    def SERIAL(a):
+        return config.get('SERIAL', a)
+
+    def KAFKA(a):
+        return config.get('KAFKA', a)
+
+    def ORION(a):
+        return config.get('ORION', a)
+
+    def CLASSFCTN(a):
+        return config.get('CLASSIFICATION', a)
+
+    def LOG(a):
+        return config.get('LOG', a)
 
     # set the logging level
     if args.debug:
@@ -84,34 +98,40 @@ if __name__ == "__main__":
     LOGGER = logger(__name__)
 
     if args.tensorflow:
-        camera = Camera(CLASSFCTN('IMAGES_DIR'))
-        tfclassify = TensorflowClassifier(CLASSFCTN('LABELS'),
-                                          CLASSFCTN('FROZEN_GRAPH'))
+        CAM = Camera(CLASSFCTN('IMAGES_DIR'))
+        FIRECLF = TensorflowClassifier(CLASSFCTN('LABELS'),
+                                       CLASSFCTN('FROZEN_GRAPH'))
 
+    sources = list()
+    sinks = list()
+    configs = list()
     _url = ORION('BROKER')
+    # Check for serial source
     if config.has_option('SERIAL', 'USB_PORT'):
-        source = SerialSource
-        sink = OrionSink
-        lconfig = SERIAL
+        sources.append(SerialSource)
+        sinks.append(OrionSink)
+        configs.append(SERIAL)
+    # Check for file source
     elif config.has_option('SERIAL', 'FILE'):
-        source = FileSource
-        sink = OrionSink
-        lconfig = SERIAL
+        sources.append(FileSource)
+        sinks.append(OrionSink)
+        configs.append(SERIAL)
+    # Check for Kafka source
     elif config.has_option('KAFKA', 'BROKER'):
-        (os, ver, _) = platform.linux_distribution()
-        if( os != 'debian' or float(ver) < 9.0):
+        (oss, ver, _) = platform.linux_distribution()
+        if(os != 'debian' or float(ver) < 9.0):
             LOGGER.error("OS version does not support Kafka consumer.")
             LOGGER.error("Please upgrade to Debian version >=9 (Stretch).")
             sys.exit(-1)
         # Check for essential parameters
         if not(KAFKA('BROKER') or KAFKA('GROUP') or KAFKA('TOPIC')):
-            LOGGER.debug("Please specify all the parameters BROKER/GROUP/TOPIC for Kafka")
+            LOGGER.debug("Please specify all the parameters"
+                         "BROKER/GROUP/TOPIC for Kafka")
             sys.exit(-1)
 
-        source = KafkaSource
-        sink = OrionSink
-        lconfig = KAFKA
-        #client = KafkaClient(hosts=args.kafka_url)
+        sources.append(KafkaSource)
+        sinks.append(OrionSink)
+        configs.append(KAFKA)
     else:
         LOGGER.debug("Configuration file does not provide any input stream")
         LOGGER.debug("Please provide one of the following inputs:")
@@ -132,34 +152,35 @@ if __name__ == "__main__":
     LOGGER.info("Starting receiving data...")
 
     # Create new threads
-    readerThreadList = []
-    for i in range(args.read_threads):
-        tname = "Reader-%d" % i
-        thread = source(threadID, tname, workQueue, queueLock, lconfig)
-        # thread.start()
-        readerThreadList.append(thread)
+    sourcesThreadList = []
+    for i in range(sources):
+        tname = "Source-%d" % i
+        thread = sources[i](threadID, tname, workQueue, queueLock, configs[i])
+        thread.start()
+        sourcesThreadList.append(thread)
         threadID += 1
 
-    writerThreadList = []
-    for i in range(args.write_threads):
-        tname = "Writer-%d" % i
-        thread = sink(threadID, tname, workQueue, queueLock, _url, schema, LOG('METRICSFILE'))
-        # thread.start()
-        writerThreadList.append(thread)
+    sinksThreadList = []
+    for i in range(sinks):
+        tname = "Sink-%d" % i
+        thread = sinks[i](threadID, tname, workQueue, queueLock, _url, schema,
+                          LOG('METRICSFILE'))
+        thread.start()
+        sinksThreadList.append(thread)
         threadID += 1
 
+# ##########
     while 1:
-        if(camera and tfclassify):
-            top_k = tfclassify.classify(camera.capture())
-            if(len(readerThreadList) > 0 and
-               len(writerThreadList) > 0):
-                readerThreadList[0]._read_data()
-                body_sizes = writerThreadList[0]._process_data(top_k)
-                LOGGER.info(body_sizes)
+        if(CAM and FIRECLF):
+            top_k = FIRECLF.classify(CAM.capture())
+            if(len(sourcesThreadList) > 0 and
+               len(sinksThreadList) > 0):
+                # sourcesThreadList[0]._read_data()
+                # body_sizes = ThreadList[0]._process_data(top_k)
+                # LOGGER.info(body_sizes)
                 time.sleep(45)
 
-
     # Wait for threads to complete
-    for t in threads:
-        t.join()
+    # for t in threads:
+    #    t.join()
     LOGGER.info("Exiting Main thread!")

@@ -1,10 +1,10 @@
 from picamera import PiCamera
-from time import sleep
 
 from log import logger
 
 
 LOGGER = logger(__name__)
+
 
 class Camera():
 

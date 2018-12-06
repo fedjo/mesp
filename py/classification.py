@@ -16,15 +16,13 @@ class TensorflowClassifier(threading.Thread):
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(2)
 
         # Loads label file, strips ocarriaga return
-        self.label_lines = [line.rstrip() for line
-            in tf.gfile.GFile(labels)]
+        self.label_lines = [line.rstrip() for line in tf.gfile.GFile(labels)]
 
         # Unpersists graph from file
         with tf.gfile.FastGFile(graph, 'rb') as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
-            _ = tf.import_graph_def(graph_def, name='')
-
+            tf.import_graph_def(graph_def, name='')
 
     def classify(self, img):
 
@@ -37,7 +35,8 @@ class TensorflowClassifier(threading.Thread):
         # Feed the image_data as input to the graph and get first prediction
         with tf.Session() as sess:
             softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
-            predictions = sess.run(softmax_tensor,{'DecodeJpeg/contents:0': image_data})
+            predictions = sess.run(softmax_tensor,
+                                   {'DecodeJpeg/contents:0': image_data})
             LOGGER.debug(predictions)
             # Sort to show labels of first prediction in order of confidence
             top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]

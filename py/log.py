@@ -3,7 +3,8 @@ from systemd.journal import JournaldLogHandler
 
 LOGGER_NAME = 'iotagent'
 
-def setup_logger(logfile, loglevel=20): # INFO loglevel
+
+def setup_logger(logfile, loglevel=20):  # INFO loglevel
 
     # Add a logger
     logger = logging.getLogger(LOGGER_NAME)
@@ -11,12 +12,13 @@ def setup_logger(logfile, loglevel=20): # INFO loglevel
     journald_handler = JournaldLogHandler()
     # set a formatter to include the level name
     journald_handler.setFormatter(logging.Formatter(
-            '[%(levelname)s] %(message)s'
+        '[%(levelname)s] %(message)s'
     ))
 
     # instantiate the FileHandler
     file_handler = logging.FileHandler(logfile)
-    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 
     # add the journald handler to the current logger
     logger.addHandler(journald_handler)
@@ -26,8 +28,5 @@ def setup_logger(logfile, loglevel=20): # INFO loglevel
     logger.info("Started Agent Log")
 
 
-
 def logger(name):
     return logging.getLogger(LOGGER_NAME + '.' + name)
-
-

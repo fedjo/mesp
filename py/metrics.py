@@ -1,6 +1,5 @@
 import threading
 import datetime
-import time
 import sys
 import csv
 import busio
@@ -22,11 +21,13 @@ class ConsumptionSource(threading.Thread):
 
     def run(self):
         with open(self.filepath, 'w+') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(['Timestamp', 'Voltage (V)', 'Current (mA)', 'Power (mW)'])
+            writer = csv.writer(csvfile, delimiter=',', quotechar='"',
+                                quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(['Timestamp', 'Voltage (V)', 'Current (mA)',
+                             'Power (mW)'])
             while True:
-                writer.writerow([str(datetime.datetime.now()), self.load_voltage,
-                               self.current, self.power])
+                writer.writerow([str(datetime.datetime.now()),
+                                 self.load_voltage, self.current, self.power])
                 csvfile.flush()
 
 
