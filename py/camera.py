@@ -1,9 +1,10 @@
-from picamera import PiCamera
+#from picamera import PiCamera
 
 from log import logger
 
 
 LOGGER = logger(__name__)
+CAM = None
 
 
 class Camera():

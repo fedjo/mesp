@@ -7,7 +7,8 @@ from confluent_kafka.avro import AvroConsumer
 from confluent_kafka.avro.serializer import SerializerError
 
 from log import logger
-from agent import CAM, FIRECLF
+from camera import CAM
+from classification import FIRECLF
 
 
 LOGGER = logger(__name__)

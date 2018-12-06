@@ -2,8 +2,8 @@
 from log import setup_logger, logger
 from sources import SerialSource, FileSource, KafkaSource
 from sink import OrionSink
-from classification import TensorflowClassifier
-from camera import Camera
+from camera import Camera, CAM
+from classification import TensorflowClassifier, FIRECLF
 
 import os
 import platform
@@ -18,10 +18,6 @@ if sys.version_info[0] < 3:
 else:
     import queue as Queue
     import configparser as ConfigParser
-
-
-CAM = None
-FIRECLF = None
 
 
 def findWholeWord(w):
@@ -153,7 +149,7 @@ if __name__ == "__main__":
 
     # Create new threads
     sourcesThreadList = []
-    for i in range(sources):
+    for i in range(len(sources)):
         tname = "Source-%d" % i
         thread = sources[i](threadID, tname, workQueue, queueLock, configs[i])
         thread.start()
@@ -161,7 +157,7 @@ if __name__ == "__main__":
         threadID += 1
 
     sinksThreadList = []
-    for i in range(sinks):
+    for i in range(len(sinks)):
         tname = "Sink-%d" % i
         thread = sinks[i](threadID, tname, workQueue, queueLock, _url, schema,
                           LOG('METRICSFILE'))

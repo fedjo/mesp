@@ -6,6 +6,7 @@ from log import logger
 
 
 LOGGER = logger(__name__)
+FIRECLF = None
 
 
 class TensorflowClassifier(threading.Thread):
