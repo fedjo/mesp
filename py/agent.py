@@ -164,7 +164,7 @@ if __name__ == "__main__":
     sinksThreadList = []
     for i in range(len(sinks)):
         tname = "Sink-%d" % i
-        thread = sinks[i](threadID, tname, sourceQueue, sourceLock,
+        thread = sinks[i](threadID, tname, sinkQueue, sinkLock,
                           url, schema, LOG('METRICSFILE'))
         thread.start()
         sinksThreadList.append(thread)
