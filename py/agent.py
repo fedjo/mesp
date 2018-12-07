@@ -91,10 +91,17 @@ if __name__ == "__main__":
         setup_logger(logfile=LOG('LOGFILE'))
     LOGGER = logger(__name__)
 
+    # Initialize the source and sink queue with locks
+    sourceQueue = Queue.Queue()
+    sourceLock = threading.Lock()
+    sinkQueue = Queue.Queue()
+    sinkLock = threading.Lock()
+
     if args.tensorflow:
         FIRECLF = TensorflowClassifier(CLASSFCTN('IMAGES_DIR'),
                                        CLASSFCTN('LABELS'),
-                                       CLASSFCTN('FROZEN_GRAPH'))
+                                       CLASSFCTN('FROZEN_GRAPH'),
+                                       sourceQueue, sourceLock)
         FIRECLF.start()
 
     sources = list()
@@ -133,10 +140,6 @@ if __name__ == "__main__":
         LOGGER.debug("SERIAL/KAFKA")
         sys.exit(-1)
 
-    sourceQueue = Queue.Queue()
-    sourceLock = threading.Lock()
-    sinkQueue = Queue.Queue()
-    sinkLock = threading.Lock()
     threadID = 1
 
     LOGGER.info("Reading schema of data...")
