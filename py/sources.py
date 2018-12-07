@@ -33,7 +33,7 @@ class GeneralSource(threading.Thread):
 
                 rawdata = dict()
                 if self.clf:
-                    if not self.scq.empty()):
+                    if not self.scq.empty():
                         self.sclock.acquire()
                         rawdata['score'] = self.scq.get()
                         self.sclock.release()

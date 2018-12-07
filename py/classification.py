@@ -28,7 +28,7 @@ class TensorflowClassifier(threading.Thread):
         with tf.gfile.FastGFile(graph, 'rb') as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
-            _ = tf.import_graph_def(graph_def, name='')
+            tf.import_graph_def(graph_def, name='')
 
         self.sess = tf.Session()
 
@@ -42,13 +42,13 @@ class TensorflowClassifier(threading.Thread):
             # Read in the image_data
             image_data = tf.gfile.FastGFile(img, 'rb').read()
 
-            # Feed the image_data as input to the graph and get first prediction
+            # Feed image_data as input to the graph and get first prediction
             with self.sess as sess:
-                softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
-                predictions = sess.run(softmax_tensor,
+                softmaxtensor = sess.graph.get_tensor_by_name('final_result:0')
+                predictions = sess.run(softmaxtensor,
                                        {'DecodeJpeg/contents:0': image_data})
                 LOGGER.debug(predictions)
-                # Sort to show labels of first prediction in order of confidence
+                # Sort & show labels of first prediction in order of confidence
                 top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
                 info_table = dict()
                 for node_id in top_k:
