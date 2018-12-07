@@ -34,16 +34,16 @@ class TensorflowClassifier(threading.Thread):
 
     def run(self):
 
-        while 1:
-            img = self.CAM.capture()
-            if not (os.path.exists(img)):
-                raise ValueError('No such image file: {}.'.format(img))
+        with self.sess as sess:
+            while 1:
+                img = self.CAM.capture()
+                if not (os.path.exists(img)):
+                    raise ValueError('No such image file: {}.'.format(img))
 
-            # Read in the image_data
-            image_data = tf.gfile.FastGFile(img, 'rb').read()
+                # Read in the image_data
+                image_data = tf.gfile.FastGFile(img, 'rb').read()
 
-            # Feed image_data as input to the graph and get first prediction
-            with self.sess as sess:
+                # Feed image_data as input to the graph and get first prediction
                 softmaxtensor = sess.graph.get_tensor_by_name('final_result:0')
                 predictions = sess.run(softmaxtensor,
                                        {'DecodeJpeg/contents:0': image_data})
@@ -57,6 +57,6 @@ class TensorflowClassifier(threading.Thread):
                     info_table[human_string] = score
                     LOGGER.debug('%s (score = %.5f)' % (human_string, score))
 
-            self.sourceLock.acquire()
-            self.sourceQueue.put(info_table["field fire"])
-            self.sourceLock.release()
+                self.sourceLock.acquire()
+                self.sourceQueue.put(info_table["field fire"])
+                self.sourceLock.release()
