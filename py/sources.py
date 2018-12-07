@@ -32,10 +32,13 @@ class GeneralSource(threading.Thread):
             try:
 
                 rawdata = dict()
-                if (self.clf and not self.scq.empty()):
-                    self.sclock.acquire()
-                    rawdata['score'] = self.scq.get()
-                    self.sclock.release()
+                if self.clf:
+                    if not self.scq.empty()):
+                        self.sclock.acquire()
+                        rawdata['score'] = self.scq.get()
+                        self.sclock.release()
+                    else:
+                        continue
 
                 if isinstance(self.istr, (Serial, file)):
                     try:
