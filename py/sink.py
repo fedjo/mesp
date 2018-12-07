@@ -41,7 +41,6 @@ class GeneralSink(threading.Thread):
                 # Check if they fit with the schema
                 if len(batches) != len(data):
                     LOGGER.debug("Schema and data format are not the same!")
-                    # raise Exception("Schema and data format are not the same!")
                     continue
 
                 # Re-pack all data to snapshot dict
@@ -49,10 +48,10 @@ class GeneralSink(threading.Thread):
                 for B, d in zip(batches, data):
                     # snapshot[B.lower().replace("#", "_")] = d
                     snapshot[B.replace("#", "_")] = d
-                if "field fire" in snapshot.keys():
-                    snapshot["field fire"] = rawdata["field fire"]
+                if "score" in snapshot.keys():
+                    snapshot["score"] = rawdata["field fire"]
                 else:
-                    snapshot["field fire"] = 0
+                    snapshot["score"] = 0
 
                 LOGGER.info("Post to Orion!")
                 LOGGER.info(snapshot)

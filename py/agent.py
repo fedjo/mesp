@@ -2,14 +2,12 @@
 from log import setup_logger, logger
 from sources import SerialSource, FileSource, KafkaSource
 from sink import OrionSink
-from camera import Camera
 from classification import TensorflowClassifier
 
 import os
 import platform
 import threading
 import sys
-import time
 import re
 import argparse
 if sys.version_info[0] < 3:
@@ -94,14 +92,15 @@ if __name__ == "__main__":
     LOGGER = logger(__name__)
 
     if args.tensorflow:
-        CAM = Camera(CLASSFCTN('IMAGES_DIR'))
-        FIRECLF = TensorflowClassifier(CLASSFCTN('LABELS'),
+        FIRECLF = TensorflowClassifier(CLASSFCTN('IMAGES_DIR'),
+                                       CLASSFCTN('LABELS'),
                                        CLASSFCTN('FROZEN_GRAPH'))
+        FIRECLF.start()
 
     sources = list()
     sinks = list()
     configs = list()
-    _url = ORION('BROKER')
+    url = ORION('BROKER')
     # Check for serial source
     if config.has_option('SERIAL', 'USB_PORT'):
         sources.append(SerialSource)
@@ -134,8 +133,10 @@ if __name__ == "__main__":
         LOGGER.debug("SERIAL/KAFKA")
         sys.exit(-1)
 
-    queueLock = threading.Lock()
-    workQueue = Queue.Queue()
+    sourceQueue = Queue.Queue()
+    sourceLock = threading.Lock()
+    sinkQueue = Queue.Queue()
+    sinkLock = threading.Lock()
     threadID = 1
 
     LOGGER.info("Reading schema of data...")
@@ -151,7 +152,8 @@ if __name__ == "__main__":
     sourcesThreadList = []
     for i in range(len(sources)):
         tname = "Source-%d" % i
-        thread = sources[i](threadID, tname, workQueue, queueLock, configs[i])
+        thread = sources[i](threadID, tname, args.tensorflow, sourceQueue,
+                            sourceLock, sinkQueue, sinkLock, configs[i])
         thread.start()
         sourcesThreadList.append(thread)
         threadID += 1
@@ -159,24 +161,13 @@ if __name__ == "__main__":
     sinksThreadList = []
     for i in range(len(sinks)):
         tname = "Sink-%d" % i
-        thread = sinks[i](threadID, tname, workQueue, queueLock, _url, schema,
-                          LOG('METRICSFILE'))
+        thread = sinks[i](threadID, tname, sourceQueue, sourceLock,
+                          url, schema, LOG('METRICSFILE'))
         thread.start()
         sinksThreadList.append(thread)
         threadID += 1
 
-# ##########
-    # while 1:
-        # if(CAM and FIRECLF):
-            #top_k = FIRECLF.classify(CAM.capture())
-            #if(len(sourcesThreadList) > 0 and
-               # len(sinksThreadList) > 0):
-                # sourcesThreadList[0]._read_data()
-                # body_sizes = ThreadList[0]._process_data(top_k)
-                # LOGGER.info(body_sizes)
-                # time.sleep(45)
-
     # Wait for threads to complete
-    # for t in threads:
-    #    t.join()
+    for t in sourcesThreadList:
+        t.join()
     LOGGER.info("Exiting Main thread!")

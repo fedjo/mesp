@@ -3,29 +3,36 @@ import threading
 import tensorflow as tf
 
 from log import logger
+from camera import Camera
 
 
 LOGGER = logger(__name__)
-FIRECLF = None
 
 
-class TensorflowClassifier():
+class TensorflowClassifier(threading.Thread):
 
-    def __init__(self, labels, graph):
+    def __init__(self, storedir, labels, graph, sourceQueue, sourceLock):
+        threading.Thread.__init__(self)
+
+        self.sourceQueue = sourceQueue
+        self.sourceLock = sourceLock
         # Just disables the warning, doesn't enable AVX/FMA
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(2)
 
         # Loads label file, strips ocarriaga return
         self.label_lines = [line.rstrip() for line in tf.gfile.GFile(labels)]
 
+        # Camera instance
+        self.CAM = Camera(storedir)
         # Unpersists graph from file
         with tf.gfile.FastGFile(graph, 'rb') as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
             tf.import_graph_def(graph_def, name='')
 
-    def classify(self, img):
+    def run(self):
 
+        img = self.CAM.capture()
         if not (os.path.exists(img)):
             raise ValueError('No such image file: {}.'.format(img))
 
@@ -47,4 +54,6 @@ class TensorflowClassifier():
                 info_table[human_string] = score
                 LOGGER.debug('%s (score = %.5f)' % (human_string, score))
 
-        return info_table
+        self.sourceLock.acquire()
+        self.sourceQueue.put(info_table["field fire"])
+        self.sourceLock.release()

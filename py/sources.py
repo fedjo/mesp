@@ -13,21 +13,27 @@ LOGGER = logger(__name__)
 
 
 class GeneralSource(threading.Thread):
-    def __init__(self, threadID, stype, name, q, queuelock, istr):
+    def __init__(self, threadID, stype, name, clf,
+                 scq, sclock, skq, sklock, istr):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.stype = stype
         self.name = name
-        self.q = q
-        self.lock = queuelock
+        self.skq = skq
+        self.sklock = sklock
         self.istr = istr
         self.exitFlag = 0
+        self.clf = clf
 
-    def read_data(self, threadName, q, istr):
+    def read_data(self):
         while not self.exitFlag:
             try:
 
                 rawdata = dict()
+                if self.clf:
+                    self.sclock.aquire()
+                    rawdata['score'] = self.scq.get()
+                    self.sclock.release()
 
                 if isinstance(self.istr, (Serial, file)):
                     try:
@@ -69,21 +75,21 @@ class GeneralSource(threading.Thread):
                 # Merge classification result with data
                 rawdata['raw'] = data
                 LOGGER.debug("Adding to queue rawdata: {}".format(rawdata))
-                self.lock.acquire()
-                self.q.put(rawdata)
-                self.lock.release()
+                self.sklock.acquire()
+                self.skq.put(rawdata)
+                self.sklock.release()
             except IOError as io:
                 LOGGER.debug(io)
 
     def run(self):
         LOGGER.info("Starting %s %s" % (self.stype, self.name))
-        self.read_data(self.name, self.q, self.istr)
+        self.read_data()
         LOGGER.info("Exiting %s %s" % (self.stype, self.name))
 
 
 class SerialSource(GeneralSource):
 
-    def __init__(self, threadID, name, q, queuelock, lconfig):
+    def __init__(self, threadID, name, clf, scq, sclock, skq, sklock, lconfig):
         istream = serial.Serial(
             '/dev/ttyUSB' + lconfig('USB_PORT'),
             baudrate=38400,
@@ -93,21 +99,21 @@ class SerialSource(GeneralSource):
             stopbits=serial.STOPBITS_ONE,
             xonxoff=False
         )
-        GeneralSource.__init__(self, threadID, 'Serial', name, q, queuelock,
-                               istream)
+        GeneralSource.__init__(self, threadID, 'Serial', name, clf,
+                               scq, sclock, skq, sklock, istream)
 
 
 class FileSource(GeneralSource):
 
-    def __init__(self, threadID, name, q, queuelock, lconfig):
+    def __init__(self, threadID, name, clf, scq, sclock, skq, sklock, lconfig):
         istream = open(lconfig('FILE'), 'r')
-        GeneralSource.__init__(self, threadID, 'File', name, q, queuelock,
-                               istream)
+        GeneralSource.__init__(self, threadID, 'File', name, clf,
+                               scq, sclock, skq, sklock, istream)
 
 
 class KafkaSource(GeneralSource):
 
-    def __init__(self, threadID, name, q, queuelock, lconfig):
+    def __init__(self, threadID, name, clf, scq, sclock, skq, sklock, lconfig):
         if lconfig('SCHEMA'):
             c = AvroConsumer({
                 'bootstrap.servers': lconfig('BROKER'),
@@ -123,5 +129,5 @@ class KafkaSource(GeneralSource):
             })
         c.subscribe(lconfig('TOPIC').split(','))
         istream = c
-        GeneralSource.__init__(self, threadID, 'Kafka', name, q, queuelock,
-                               istream)
+        GeneralSource.__init__(self, threadID, 'Kafka', name, clf,
+                               scq, sclock, skq, sklock, istream)
