@@ -28,32 +28,35 @@ class TensorflowClassifier(threading.Thread):
         with tf.gfile.FastGFile(graph, 'rb') as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
-            tf.import_graph_def(graph_def, name='')
+            _ = tf.import_graph_def(graph_def, name='')
+
+        self.sess = tf.Session()
 
     def run(self):
 
-        img = self.CAM.capture()
-        if not (os.path.exists(img)):
-            raise ValueError('No such image file: {}.'.format(img))
+        while 1:
+            img = self.CAM.capture()
+            if not (os.path.exists(img)):
+                raise ValueError('No such image file: {}.'.format(img))
 
-        # Read in the image_data
-        image_data = tf.gfile.FastGFile(img, 'rb').read()
+            # Read in the image_data
+            image_data = tf.gfile.FastGFile(img, 'rb').read()
 
-        # Feed the image_data as input to the graph and get first prediction
-        with tf.Session() as sess:
-            softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
-            predictions = sess.run(softmax_tensor,
-                                   {'DecodeJpeg/contents:0': image_data})
-            LOGGER.debug(predictions)
-            # Sort to show labels of first prediction in order of confidence
-            top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
-            info_table = dict()
-            for node_id in top_k:
-                human_string = self.label_lines[node_id]
-                score = predictions[0][node_id]
-                info_table[human_string] = score
-                LOGGER.debug('%s (score = %.5f)' % (human_string, score))
+            # Feed the image_data as input to the graph and get first prediction
+            with self.sess as sess:
+                softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
+                predictions = sess.run(softmax_tensor,
+                                       {'DecodeJpeg/contents:0': image_data})
+                LOGGER.debug(predictions)
+                # Sort to show labels of first prediction in order of confidence
+                top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
+                info_table = dict()
+                for node_id in top_k:
+                    human_string = self.label_lines[node_id]
+                    score = predictions[0][node_id]
+                    info_table[human_string] = score
+                    LOGGER.debug('%s (score = %.5f)' % (human_string, score))
 
-        self.sourceLock.acquire()
-        self.sourceQueue.put(info_table["field fire"])
-        self.sourceLock.release()
+            self.sourceLock.acquire()
+            self.sourceQueue.put(info_table["field fire"])
+            self.sourceLock.release()

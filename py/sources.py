@@ -19,6 +19,8 @@ class GeneralSource(threading.Thread):
         self.threadID = threadID
         self.stype = stype
         self.name = name
+        self.scq = scq
+        self.sclock = sclock
         self.skq = skq
         self.sklock = sklock
         self.istr = istr
@@ -30,8 +32,8 @@ class GeneralSource(threading.Thread):
             try:
 
                 rawdata = dict()
-                if self.clf:
-                    self.sclock.aquire()
+                if (self.clf and not self.scq.empty()):
+                    self.sclock.acquire()
                     rawdata['score'] = self.scq.get()
                     self.sclock.release()
 
