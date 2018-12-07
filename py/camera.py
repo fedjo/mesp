@@ -1,4 +1,4 @@
-#from picamera import PiCamera
+from picamera import PiCamera
 
 from log import logger
 
