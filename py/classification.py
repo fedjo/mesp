@@ -9,10 +9,9 @@ LOGGER = logger(__name__)
 FIRECLF = None
 
 
-class TensorflowClassifier(threading.Thread):
+class TensorflowClassifier():
 
     def __init__(self, labels, graph):
-        threading.Thread.__init__(self)
         # Just disables the warning, doesn't enable AVX/FMA
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(2)
 

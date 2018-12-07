@@ -2,8 +2,8 @@
 from log import setup_logger, logger
 from sources import SerialSource, FileSource, KafkaSource
 from sink import OrionSink
-from camera import Camera, CAM
-from classification import TensorflowClassifier, FIRECLF
+from camera import Camera
+from classification import TensorflowClassifier
 
 import os
 import platform
@@ -166,15 +166,15 @@ if __name__ == "__main__":
         threadID += 1
 
 # ##########
-    while 1:
-        if(CAM and FIRECLF):
-            top_k = FIRECLF.classify(CAM.capture())
-            if(len(sourcesThreadList) > 0 and
-               len(sinksThreadList) > 0):
+    # while 1:
+        # if(CAM and FIRECLF):
+            #top_k = FIRECLF.classify(CAM.capture())
+            #if(len(sourcesThreadList) > 0 and
+               # len(sinksThreadList) > 0):
                 # sourcesThreadList[0]._read_data()
                 # body_sizes = ThreadList[0]._process_data(top_k)
                 # LOGGER.info(body_sizes)
-                time.sleep(45)
+                # time.sleep(45)
 
     # Wait for threads to complete
     # for t in threads:

@@ -7,8 +7,6 @@ from confluent_kafka.avro import AvroConsumer
 from confluent_kafka.avro.serializer import SerializerError
 
 from log import logger
-from camera import CAM
-from classification import FIRECLF
 
 
 LOGGER = logger(__name__)
@@ -30,8 +28,6 @@ class GeneralSource(threading.Thread):
             try:
 
                 rawdata = dict()
-                if FIRECLF:
-                    rawdata = FIRECLF.classify(CAM.capture())
 
                 if isinstance(self.istr, (Serial, file)):
                     try:
@@ -44,10 +40,11 @@ class GeneralSource(threading.Thread):
                     # if findWholeWord('UNIQUEDID'):
 
                     line = self.istr.readline()
-                    if not line:
+                    if (not line or len(line) <= 20):
                         continue
 
-                    data = line.split()[0]
+                    d = line.split()
+                    data = d[0]
 
                 if isinstance(self.istr, Consumer):
                     try:
@@ -71,7 +68,7 @@ class GeneralSource(threading.Thread):
 
                 # Merge classification result with data
                 rawdata['raw'] = data
-
+                LOGGER.debug("Adding to queue rawdata: {}".format(rawdata))
                 self.lock.acquire()
                 self.q.put(rawdata)
                 self.lock.release()
