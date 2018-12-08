@@ -52,6 +52,10 @@ class GeneralSink(threading.Thread):
                     snapshot["score"] = rawdata["field fire"]
                 else:
                     snapshot["score"] = 0
+                if "imgname" in snapshot.keys():
+                    snapshot["imgname"] = rawdata["imgname"]
+                else:
+                    snapshot["imgname"] = ''
 
                 LOGGER.info("Post to Orion!")
                 LOGGER.info(snapshot)
@@ -140,6 +144,10 @@ class OrionSink(GeneralSink):
             headers = {'Accept': 'application/json'}
             sess = requests.Session()
             for t, l in translation.iteritems():
+                # Hack for ngsi-lg json objects
+                if t == 'ngsild':
+                    url += '?options=keyValues'
+
                 tnsm_time = time.time()
                 for json in l:
                     req = requests.Request('POST', url=url, headers=headers,
