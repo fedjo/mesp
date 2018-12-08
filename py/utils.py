@@ -37,7 +37,8 @@ def mesp_dm(snapshot_dict, timestamp):
         'temp-soil': 'Number',
         'uniqueid': 'time',
         'epoch': 'time',
-        'score': 'Number'
+        'score': 'Number',
+        'imgname': 'String'
     }
     for k, v in snapshot_dict.iteritems():
         if '_' in k:
@@ -74,6 +75,7 @@ def ngsi_dm(snapshot_dict, timestamp):
     GPS_X = float(snapshot_dict["GPS_1"].split(',')[0])
     GPS_Y = float(snapshot_dict["GPS_1"].split(',')[1])
     SCORE = str(snapshot_dict["score"])
+    IMGNAME = snapshot_dict["imgname"]
 
     json_airquality = {
         "id": "AirQualityObserved:ntua:" + UNIQUEID,
@@ -183,7 +185,7 @@ def ngsi_dm(snapshot_dict, timestamp):
             "type": "text"
         },
         "alertSource": {
-            "value": "Based on iMESP image classification engine",
+            "value": IMGNAME,
             "type": "text"
         }
     }
@@ -257,6 +259,7 @@ def ngsild_dm(snapshot_dict, timestamp):
     GPS_X = float(snapshot_dict["GPS_1"].split(',')[0])
     GPS_Y = float(snapshot_dict["GPS_1"].split(',')[1])
     SCORE = str(snapshot_dict["score"])
+    IMGNAME = snapshot_dict["imgname"]
 
     json_airquality = {
         "@context": [
@@ -392,7 +395,7 @@ def ngsild_dm(snapshot_dict, timestamp):
             "type": "text"
         },
         "alertSource": {
-            "value": "Based on iMESP image classification engine",
+            "value": IMGNAME,
             "type": "text"
         }
     }

@@ -35,7 +35,9 @@ class GeneralSource(threading.Thread):
                 if self.clf:
                     if not self.scq.empty():
                         self.sclock.acquire()
-                        rawdata['score'] = self.scq.get()
+                        (img, score) = self.scq.get()
+                        rawdata['imgname'] = img
+                        rawdata['score'] = score
                         self.sclock.release()
                     else:
                         continue

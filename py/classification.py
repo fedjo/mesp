@@ -58,5 +58,5 @@ class TensorflowClassifier(threading.Thread):
                     LOGGER.debug('%s (score = %.5f)' % (human_string, score))
 
                 self.sourceLock.acquire()
-                self.sourceQueue.put(info_table["field fire"])
+                self.sourceQueue.put((img, info_table["field fire"]))
                 self.sourceLock.release()
