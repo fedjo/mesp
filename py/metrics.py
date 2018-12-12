@@ -8,13 +8,24 @@ from board import SCL, SDA
 
 
 class ConsumptionSource(threading.Thread):
+
+
     def __init__(self, metrics_filepath):
         i2c_bus = busio.I2C(SCL, SDA)
-        ina219 = adafruit_ina219.INA219(i2c_bus)
-        self.load_voltage = ina219.bus_voltage + ina219.shunt_voltage
-        self.current = ina219.current
-        self.power = self.load_voltage * self.current
+        self.ina219 = adafruit_ina219.INA219(i2c_bus)
+        # self.load_voltage = ina219.bus_voltage + ina219.shunt_voltage
+        # self.current = ina219.current
+        # self.power = self.load_voltage * self.current
         self.filepath = metrics_filepath
+
+    def load_voltage(self):
+        return (self.ina219.bus_voltage + self.ina219.shunt_voltage)
+
+    def current(self):
+        return self.ina219.current
+
+    def power(self):
+        return (self.load_voltage() * self.current())
 
     def get_metrics(self):
         return (self.load_voltage, self.current, self.power)
@@ -27,7 +38,7 @@ class ConsumptionSource(threading.Thread):
                              'Power (mW)'])
             while True:
                 writer.writerow([str(datetime.datetime.now()),
-                                 self.load_voltage, self.current, self.power])
+                                 self.load_voltage(), self.current(), self.power()])
                 csvfile.flush()
 
 
