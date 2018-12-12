@@ -40,7 +40,7 @@ def mesp_dm(snapshot_dict, timestamp):
         'score': 'Number',
         'imgname': 'String'
     }
-    for k, v in snapshot_dict.iteritems():
+    for k, v in snapshot_dict.items():
         if '_' in k:
             k = k[:-2]
         k = k.lower()
@@ -49,7 +49,7 @@ def mesp_dm(snapshot_dict, timestamp):
         # if 'epoch' in k:
         #    v = datetime.datetime.utcfromtimestamp(int(v))
         value[k] = {
-            "value": v,
+            "value": str(v),
             "type": types[k]
         }
         json.update(value)

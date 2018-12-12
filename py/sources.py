@@ -42,7 +42,7 @@ class GeneralSource(threading.Thread):
                     else:
                         continue
 
-                if isinstance(self.istr, (Serial, file)):
+                if isinstance(self.istr, Serial):
                     try:
                         self.istr.reset_input_buffer()
                         self.istr.flushInput()

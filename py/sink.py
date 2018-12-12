@@ -36,7 +36,7 @@ class GeneralSink(threading.Thread):
 
                 # Get rawdata
                 batches = self.schema.split(';')[:-1]
-                data = rawdata['raw'].split(";")[:-1]
+                data = rawdata['raw'].decode('utf-8').split(";")[:-1]
 
                 # Check if they fit with the schema
                 if len(batches) != len(data):
@@ -48,17 +48,14 @@ class GeneralSink(threading.Thread):
                 for B, d in zip(batches, data):
                     # snapshot[B.lower().replace("#", "_")] = d
                     snapshot[B.replace("#", "_")] = d
-                if "score" in snapshot.keys():
-                    snapshot["score"] = rawdata["field fire"]
+                if "score" in rawdata:
+                    snapshot["score"] = rawdata["score"]
                 else:
                     snapshot["score"] = 0
-                if "imgname" in snapshot.keys():
+                if "imgname" in rawdata:
                     snapshot["imgname"] = rawdata["imgname"]
                 else:
                     snapshot["imgname"] = ''
-
-                LOGGER.info("Post to Orion!")
-                LOGGER.info(snapshot)
 
                 req_bytes = self.sink(snapshot)
         return req_bytes
@@ -117,6 +114,9 @@ class OrionSink(GeneralSink):
 
     def posttoorion(self, snapshot):
 
+        LOGGER.debug('Post to Orion')
+        LOGGER.info(snapshot)
+
         # Timestampjust before the tranlation
         before_trans_tmst = datetime.datetime.now()
         # Translate on different models and post data to Orion
@@ -143,7 +143,7 @@ class OrionSink(GeneralSink):
             url = self.url + '/v2/entities'
             headers = {'Accept': 'application/json'}
             sess = requests.Session()
-            for t, l in translation.iteritems():
+            for t, l in translation.items():
                 # Hack for ngsi-lg json objects
                 if t == 'ngsild':
                     url += '?options=keyValues'

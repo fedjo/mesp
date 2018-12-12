@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 from log import setup_logger, logger
 from sources import SerialSource, FileSource, KafkaSource
 from sink import OrionSink
