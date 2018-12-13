@@ -5,7 +5,7 @@ import requests
 import csv
 
 from log import logger
-from utils import mesp_dm, ngsi_dm, ngsild_dm
+from utils import mesp_dm, mesp_dm2, ngsi_dm, ngsild_dm
 from metrics import ConsumptionSource
 
 LOGGER = logger(__name__)
@@ -128,9 +128,9 @@ class OrionSink(GeneralSink):
 
         consumption.start()
         tmmesp = time.time()
-        translation['mesp'] = mesp_dm(snapshot, before_trans_tmst)
+        translation['mesp'] = mesp_dm2(snapshot, before_trans_tmst)
         translation_time['mesp'] = time.time() - tmmesp
-    
+        LOGGER.debug("Here")    
         tmngsi = time.time()
         translation['ngsi'] = ngsi_dm(snapshot, before_trans_tmst)
         translation_time['ngsi'] = time.time() - tmngsi

@@ -56,6 +56,74 @@ def mesp_dm(snapshot_dict, timestamp):
 
     return [json]
 
+def mesp_dm2(snapshot_dict, timestamp):
+
+    json = {
+
+        "id": snapshot_dict["UNIQUEID"],
+        "type": "MespMeasurement",
+        "translation_timestamp": {
+            "value": timestamp.strftime('%s'),
+            "type": "time"
+        },
+        "flame": {
+            "type": "Number",
+            "value": "1023",
+            "metadata": {}
+        },
+        "gas": {
+            "type": "Number",
+            "value": "0",
+            "metadata": {}
+        },
+        "gps_location": {
+            "type": "GPS",
+            "value": "0.000000,0.000000",
+            "metadata": {}
+        },
+        "humidity": {
+            "type": "Number",
+            "value": "5.00",
+            "metadata": {}
+        },
+        "imgname": {
+            "type": "String",
+            "value": "/home/pi/Desktop/exp1/0.jpg",
+            "metadata": {}
+        },
+        "nodeid": {
+            "type": "id",
+            "value": "1234",
+            "metadata": {}
+        },
+        "score": {
+            "type": "Number",
+            "value": "0.6835359",
+            "metadata": {}
+        },
+        "temp-air": {
+            "type": "Number",
+            "value": "25.00",
+            "metadata": {}
+        },
+        "temp-soil": {
+            "type": "Number",
+            "value": "25.00",
+            "metadata": {}
+        },
+        "translation_timestamp": {
+            "type": "time",
+            "value": "1544628784",
+            "metadata": {}
+        },
+        "uniqueid": {
+            "type": "time",
+            "value": "121218173304",
+            "metadata": {}
+        }
+    }
+    return [json]
+
 
 def ngsi_dm(snapshot_dict, timestamp):
 
