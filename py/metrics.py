@@ -6,17 +6,52 @@ import busio
 import adafruit_ina219
 from board import SCL, SDA
 
+from log import logger
+
+LOGGER = logger(__name__)
 
 class ConsumptionSource(threading.Thread):
 
 
-    def __init__(self, metrics_filepath):
+    def __init__(self):
+        threading.Thread.__init__(self)
         i2c_bus = busio.I2C(SCL, SDA)
         self.ina219 = adafruit_ina219.INA219(i2c_bus)
-        # self.load_voltage = ina219.bus_voltage + ina219.shunt_voltage
-        # self.current = ina219.current
-        # self.power = self.load_voltage * self.current
-        self.filepath = metrics_filepath
+        self.exitFlag = 1
+        self.retFlag = 0
+        self.totalvoltage = 0.0
+        self.totalcurrent = 0.0
+        self.totalpower = 0.0
+        self.counter = 0
+
+
+    def run(self):
+        while self.exitFlag:
+            v = self.ina219.bus_voltage + self.ina219.shunt_voltage
+            self.totalvoltage += v 
+            c = self.ina219.current
+            self.totalcurrent += c
+            self.totalpower += (self.ina219.bus_voltage + self.ina219.shunt_voltage) * \
+                    self.ina219.current
+            self.counter += 1
+        LOGGER.debug('Metrics taken')
+        self.retFlag = 1
+
+    def stop(self):
+        LOGGER.debug('Exiting metrics')
+        self.exitFlag = 0
+
+    def get(self):
+        while not self.retFlag:
+            continue
+        if self.counter != 0:
+            v = (self.totalvoltage / self.counter)
+            c = (self.totalcurrent / self.counter)
+            p = (self.totalpower / self.counter)
+            LOGGER.debug('Metrics {}, {}, {}'.format(v,c,p))
+            return (v, c, p)
+        else:
+            return (self.load_voltage(), self.current(), self.power())
 
     def load_voltage(self):
         return (self.ina219.bus_voltage + self.ina219.shunt_voltage)
@@ -29,21 +64,3 @@ class ConsumptionSource(threading.Thread):
 
     def get_metrics(self):
         return (self.load_voltage, self.current, self.power)
-
-    def run(self):
-        with open(self.filepath, 'w+') as csvfile:
-            writer = csv.writer(csvfile, delimiter=',', quotechar='"',
-                                quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(['Timestamp', 'Voltage (V)', 'Current (mA)',
-                             'Power (mW)'])
-            while True:
-                writer.writerow([str(datetime.datetime.now()),
-                                 self.load_voltage(), self.current(), self.power()])
-                csvfile.flush()
-
-
-if __name__ == "__main__":
-
-    # Code to write metrics to a file
-    consumption = ConsumptionSource(sys.argv[1])
-    consumption.run()

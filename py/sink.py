@@ -6,6 +6,7 @@ import csv
 
 from log import logger
 from utils import mesp_dm, ngsi_dm, ngsild_dm
+from metrics import ConsumptionSource
 
 LOGGER = logger(__name__)
 
@@ -79,7 +80,8 @@ class OrionSink(GeneralSink):
                                     quoting=csv.QUOTE_MINIMAL)
                 writer.writerow(['TIMESTAMP', 'UNIQUEID', 'TYPE',
                                  'TRANSLATION_TIME', 'TRANSMITION_TIME',
-                                 'NO_REQUESTS', 'TOTAL_JSON_SIZE'])
+                                 'NO_REQUESTS', 'TOTAL_JSON_SIZE',
+                                 'VOLTAGE (V)', 'Current(mA)', 'Power(mW)'])
 
     def getfromorion_id(self, id):
         LOGGER.debug("get from Orion!")
@@ -116,7 +118,7 @@ class OrionSink(GeneralSink):
 
         LOGGER.debug('Post to Orion')
         LOGGER.info(snapshot)
-
+        consumption = ConsumptionSource()
         # Timestampjust before the tranlation
         before_trans_tmst = datetime.datetime.now()
         # Translate on different models and post data to Orion
@@ -124,10 +126,11 @@ class OrionSink(GeneralSink):
         # Keep time for each tranlation
         translation_time = dict()
 
+        consumption.start()
         tmmesp = time.time()
         translation['mesp'] = mesp_dm(snapshot, before_trans_tmst)
         translation_time['mesp'] = time.time() - tmmesp
-
+    
         tmngsi = time.time()
         translation['ngsi'] = ngsi_dm(snapshot, before_trans_tmst)
         translation_time['ngsi'] = time.time() - tmngsi
@@ -165,14 +168,17 @@ class OrionSink(GeneralSink):
                     transmition_time[t] = time.time() - tnsm_time
                     LOGGER.debug("Response")
                     LOGGER.debug(response.text)
-
+        
+        consumption.stop()
+        (v, c, p) = consumption.get()
         with open(self.metricspath, 'a+') as csvfile:
             for t in translation.keys():
                 writer = csv.writer(csvfile, delimiter=',', quotechar='"',
                                     quoting=csv.QUOTE_MINIMAL)
                 row = [str(datetime.datetime.now()), snapshot['UNIQUEID'], t,
                        translation_time[t], transmition_time[t],
-                       len(translation_size[t]), sum(translation_size[t])]
+                       len(translation_size[t]), sum(translation_size[t]),
+                       v, c, p]
                 writer.writerow(row)
                 csvfile.flush()
 
