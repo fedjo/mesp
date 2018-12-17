@@ -43,7 +43,7 @@ class TensorflowClassifier(threading.Thread):
                 # Read in the image_data
                 image_data = tf.gfile.FastGFile(img, 'rb').read()
 
-                # Feed image_data as input to the graph and get first prediction
+                # Feed image_data as input to graph and get first prediction
                 softmaxtensor = sess.graph.get_tensor_by_name('final_result:0')
                 predictions = sess.run(softmaxtensor,
                                        {'DecodeJpeg/contents:0': image_data})

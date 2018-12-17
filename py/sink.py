@@ -128,9 +128,10 @@ class OrionSink(GeneralSink):
 
         consumption.start()
         tmmesp = time.time()
+        translation['mesp'] = mesp_dm(snapshot, before_trans_tmst)
         translation['mesp'] = mesp_dm2(snapshot, before_trans_tmst)
         translation_time['mesp'] = time.time() - tmmesp
-        LOGGER.debug("Here")    
+
         tmngsi = time.time()
         translation['ngsi'] = ngsi_dm(snapshot, before_trans_tmst)
         translation_time['ngsi'] = time.time() - tmngsi
@@ -168,7 +169,7 @@ class OrionSink(GeneralSink):
                     transmition_time[t] = time.time() - tnsm_time
                     LOGGER.debug("Response")
                     LOGGER.debug(response.text)
-        
+
         consumption.stop()
         (v, c, p) = consumption.get()
         with open(self.metricspath, 'a+') as csvfile:

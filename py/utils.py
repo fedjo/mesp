@@ -8,7 +8,7 @@ LOGGER = logger(__name__)
 
 def calltoopenweathermap():
     LOGGER.debug("Goodbye, World!")
-    weather_url = 'http://api.openweathermap.org/data/2.5/forecast?lat=38.303860&lon=23.730180&cnt=5&appid=3a87a263c645ea5eb18ad7417be4cb0d'
+    weather_url = 'http://api.openweathermap.org/data/2.5/forecast?lat=38.303860&lon=23.730180&cnt=5&appid=3a87a263c645ea5eb18ad7417be4cb0d'  # noqa: E501
     LOGGER.debug(weather_url)
     response = requests.post(weather_url)
     LOGGER.debug(response.json())
@@ -55,6 +55,7 @@ def mesp_dm(snapshot_dict, timestamp):
         json.update(value)
 
     return [json]
+
 
 def mesp_dm2(snapshot_dict, timestamp):
 
@@ -109,11 +110,6 @@ def mesp_dm2(snapshot_dict, timestamp):
         "temp-soil": {
             "type": "Number",
             "value": "25.00",
-            "metadata": {}
-        },
-        "translation_timestamp": {
-            "type": "time",
-            "value": "1544628784",
             "metadata": {}
         },
         "uniqueid": {
@@ -331,8 +327,8 @@ def ngsild_dm(snapshot_dict, timestamp):
 
     json_airquality = {
         "@context": [
-            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
-            "https://raw.githubusercontent.com/GSMADeveloper/NGSI-LD-Entities/master/examples/Air-Quality-Observed-context.jsonld"
+            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",  # noqa: E501
+            "https://raw.githubusercontent.com/GSMADeveloper/NGSI-LD-Entities/master/examples/Air-Quality-Observed-context.jsonld"  # noqa: E501
         ],
         "id": "urn:ngsi-ld:AirQualityObserved:" + UNIQUEID,
         "type": "AirQualityObserved",
@@ -382,8 +378,8 @@ def ngsild_dm(snapshot_dict, timestamp):
 
     json_forest_fire = {
         "@context": [
-            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
-            "https://raw.githubusercontent.com/nikoskal/mesp/mdpi/etsi_ngsild_datamodels/specs/Alert/schema.json"
+            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",  # noqa: E501
+            "https://raw.githubusercontent.com/nikoskal/mesp/mdpi/etsi_ngsild_datamodels/specs/Alert/schema.json"  # noqa: E501
         ],
         "id": "urn:ngsi-ld:Alert:security:" + UNIQUEID,
         "type": "Alert",
@@ -426,8 +422,8 @@ def ngsild_dm(snapshot_dict, timestamp):
 
     json_forest_fire_image = {
         "@context": [
-            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
-            "https://raw.githubusercontent.com/nikoskal/mesp/mdpi/etsi_ngsild_datamodels/specs/Alert/schema.json"
+            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",  # noqa: E501
+            "https://raw.githubusercontent.com/nikoskal/mesp/mdpi/etsi_ngsild_datamodels/specs/Alert/schema.json"  # noqa: E501
         ],
         "id": "urn:ngsi-ld:Alert:security:image:" + UNIQUEID,
         "type": "Alert",
@@ -470,8 +466,8 @@ def ngsild_dm(snapshot_dict, timestamp):
 
     json_greenspace = {
         "@context": [
-            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
-            "https://raw.githubusercontent.com/GSMADeveloper/NGSI-LD-Entities/master/examples/Agri-Parcel-Record-context.jsonld"
+            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",  # noqa: E501
+            "https://raw.githubusercontent.com/GSMADeveloper/NGSI-LD-Entities/master/examples/Agri-Parcel-Record-context.jsonld"  # noqa: E501
         ],
 
         "id": "urn:ngsi-ld:AgriParcelRecord:" + UNIQUEID,

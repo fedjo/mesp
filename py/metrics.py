@@ -1,7 +1,4 @@
 import threading
-import datetime
-import sys
-import csv
 import busio
 import adafruit_ina219
 from board import SCL, SDA
@@ -10,8 +7,8 @@ from log import logger
 
 LOGGER = logger(__name__)
 
-class ConsumptionSource(threading.Thread):
 
+class ConsumptionSource(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
@@ -24,15 +21,15 @@ class ConsumptionSource(threading.Thread):
         self.totalpower = 0.0
         self.counter = 0
 
-
     def run(self):
         while self.exitFlag:
             v = self.ina219.bus_voltage + self.ina219.shunt_voltage
-            self.totalvoltage += v 
+            self.totalvoltage += v
             c = self.ina219.current
             self.totalcurrent += c
-            self.totalpower += (self.ina219.bus_voltage + self.ina219.shunt_voltage) * \
-                    self.ina219.current
+            self.totalpower += ((self.ina219.bus_voltage +
+                                self.ina219.shunt_voltage) *
+                                self.ina219.current)
             self.counter += 1
         LOGGER.debug('Metrics taken')
         self.retFlag = 1
@@ -48,7 +45,7 @@ class ConsumptionSource(threading.Thread):
             v = (self.totalvoltage / self.counter)
             c = (self.totalcurrent / self.counter)
             p = (self.totalpower / self.counter)
-            LOGGER.debug('Metrics {}, {}, {}'.format(v,c,p))
+            LOGGER.debug('Metrics {}, {}, {}'.format(v, c, p))
             return (v, c, p)
         else:
             return (self.load_voltage(), self.current(), self.power())
