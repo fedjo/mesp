@@ -1,0 +1,25 @@
+X,Y,NÚMERO,ESTACIÓN,DIRECCIÓN,LONGITUD,LATITUD,ALTITUD,TIPO ESTACION *,NO2,SO2,CO,PM10,"PM2,5",O3,BTX,HC,UV,VV,DV,TMP,HR,PRB,RS,LL
+-3.712247222222222,40.423852777777775,4,Pza. de España,Plaza de España,"-03 42 44,09","40 25 25,87",635,UT,X,X,X,,,,,,,X,X,X,X,,,X
+-3.682319444444444,40.42156388888889,8,Escuelas Aguirre,Entre C/ Alcalá y C/ O’ Donell ,"-03 40 56,35","40 25 17,63",670,UT,X,X,X,X,X,X,X,X,,,,,,,,
+-3.677355555555556,40.451475,11,Avda. Ramón y Cajal,Avda. Ramón y Cajal  esq. C/ Príncipe de Vergara,"-03 40 38,48","40 27 05,31",708,UT,X,,,,,,X,,,,,,,,,X
+-3.639233333333333,40.440047222222219,16,Arturo Soria,C/ Arturo Soria  esq. C/  Vizconde de los Asilos ,"-03 38 21,24","40 26 24,17",693,UF,X,,X,,,X,,,,,,,,,,X
+-3.713322222222222,40.347138888888892,17,Villaverde,C/. Juan Peñalver,"-03 42 47,96","40 20 49,70",604,UF,X,X,,,,X,,,,,,,,,,
+-3.731852777777778,40.394780555555556,18,Farolillo,Calle Farolillo - C/Ervigio,"-03 43 54,67","40 23 41,21",630,UF,X,X,X,X,,X,X,,,,,X,,,,X
+-3.747347222222222,40.419355555555555,24,Casa de Campo,Casa de Campo  (Terminal del Teleférico),"-03 44 50,45","40 25 09,68",642,S,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X
+-3.580030555555556,40.476927777777775,27,Barajas Pueblo,"C/. Júpiter, 21 (Barajas) ","-03 34 48,11","40 28 36,94",621,UF,X,,,,,X,,,,,,,,,,
+-3.703172222222222,40.41920833333333,35,Pza. del Carmen,Plaza del Carmen esq. Tres Cruces. ,"-03 42 11,42","40 25 9,15",659,UF,X,X,X,,,X,,,,,,,,,,
+-3.645305555555556,40.407947222222219,36,Moratalaz,Avd. Moratalaz  esq. Camino de los Vinateros,"-03 38 43,10","40 24 28,61",685,UT,X,X,X,X,,,,,,,,,,,,X
+-3.707127777777778,40.445544444444444,38,Cuatro Caminos,Avda. Pablo Iglesias esq. C/ Marqués de Lema,"-03 42 25,66","40 26 43,96",698,UT,X,X,,X,X,,X,,,,,X,,,,X
+-3.711541666666667,40.478227777777775,39,Barrio del Pilar,Avd. Betanzos esq. C/  Monforte de Lemos ,"-03 42 41,55","40 28 41,62",674,UT,X,,X,,,X,,,,,,,,,,X
+-3.651522222222222,40.388152777777776,40,Vallecas,C/ Arroyo del Olivar  esq. C/  Río Grande. ,"-03 39 05,48","40 23 17,35",677,UF,X,X,,X,,,,,,,,,,,,X
+-3.686825,40.398113888888886,47,Mendez Alvaro,C/ Juan de Mariana / Pza. Amanecer Mendez Alvaro,"-03 41 12,57","40 23 53,21",599,UF,X,,,X,X,,,,,,,,,,,
+-3.690366666666667,40.439897222222221,48,Castellana,C/ Jose Gutierrez Abascal,"-03 41 25,32","40 26 23,63",676,UT,X,,,X,X,,,,,,,,,,,
+-3.682583333333334,40.414444444444442,49,Parque del Retiro,Paseo Venezuela- Casa de Vacas,"-03 40 57,3",40 24 52,662,UF,X,,,,,X,,,,,,,,,,
+-3.688769444444445,40.465572222222221,50,Plaza Castilla,Plaza Castilla (Canal),"-03 41 19,57","40 27 56,06",728,UT,X,,,X,X,,,,,,,X,,,,
+-3.612116666666667,40.372933333333336,54,Ensanche de Vallecas,Avda La Gavia / Avda. Las Suertes,"-03 36 43,62","40 22 22,56",627,UF,X,,,,,X,,,X,X,X,X,,,,X
+-3.580747222222222,40.462530555555553,55,Urb. Embajada,C/ Riaño (Barajas) ,"-03 34 50,69","40 27 45,11",618,UF,X,,,X,,,X,X,,,,,,,,
+-3.718727777777778,40.38496388888889,56,Pza. Fernández Ladreda, Pza. Fernández Ladreda - Avda. Oporto,"-03 43 07,42","40 23 05,87",604,UT,X,,X,,,X,,,,X,X,X,X,,,X
+-3.660502777777778,40.494208333333333,57,Sanchinarro,C/ Princesa de Eboli esq C/ Maria Tudor,"-03 39 37,81","40 29 39,15",700,UF,X,X,X,X,,,,,,,,X,,,,
+-3.774611111111111,40.518058333333336,58,El Pardo,Avda. La Guardia,"-03 46 28,60","40 31 05,01",615,S,X,,,,,X,,,,,,,,,,
+-3.609072222222222,40.46525,59,Juan Carlos I,Parque Juan Carlos I (frente oficinas mantenimiento),"-03 36 32,66","40 27 54,90",660,S,X,,,,,X,,,X,X,X,X,X,X,X,X
+-3.689761111111111,40.500588888888892,60,Tres Olivos,Plaza Tres Olivos,"-03 41 23,14","40 30 02,12",715,UF,X,,,X,,X,,,,,,,,X,,X

@@ -1,0 +1,57 @@
+{   "@context": [
+        "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.json",
+        "https://raw.githubusercontent.com/GSMADeveloper/NGSI-LD-Entities/master/examples/Device-Model-context.jsonld"
+    ],
+    "id": "urn:ngsi-ld:DeviceModel:ba2d4fd9-f57f-4610-a589-2d52670d14f3",
+    "type": "DeviceModel",
+    "createdAt": "2017-01-01T01:20:00Z",
+    "modifiedAt": "2017-05-04T12:30:00Z",
+    "source": "https://source.example.com",
+    "dataProvider": "https://provider.example.com",
+    "entityVersion": 2.0,
+    "name": {
+        "type": "Property",
+        "value": "Sensor Model 501"
+    },
+    "doc": {
+        "type": "Property",
+        "value": {
+            "@value": "https://example.com",
+            "@type": "https://schema.org/url"
+        }
+    },
+    "category": {
+        "type": "Property",
+        "value": [
+            "sensor"
+        ]
+    },
+    "description": {
+        "type": "Property",
+        "value": "Monomatics All Weather Temperature Sensor."
+    },
+    "manufacturerName": {
+        "type": "Property",
+        "value": "ACME Manufacturing, Inc."
+    },
+    "brandName": {
+        "type": "Property",
+        "value": "SuperWidgets"
+    },
+    "root": {
+        "type": "Property",
+        "value": false
+    },
+    "deviceModelParent": {
+        "type": "Relationship",
+        "object": "urn:ngsi-ld:DeviceModel:29477bba-46f6-11e8-9ebe-979a9513bf23"
+    },
+    "deviceModelChildren": {
+        "type": "Relationship",
+        "object": [
+            "urn:ngsi-ld:DeviceModel:95051122-58f9-11e8-85ac-07519c4f0770",
+            "urn:ngsi-ld:DeviceModel:9a76da28-58f9-11e8-b59c-2bc9949dfc9e",
+            "urn:ngsi-ld:DeviceModel:a0b87360-58f9-11e8-80a3-4373f857494b"
+        ]
+    }
+}

@@ -1,0 +1,273 @@
+[
+ {
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background", "Roadside"],
+  "pollutant": "CO",
+  "indexClass": "VeryLow",
+  "maxConcentration": 5000,
+  "minConcentration": 0,
+  "source": "http://www.airqualitynow.eu/"
+},
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background", "Roadside"],
+  "pollutant": "CO",
+  "indexClass": "Low",
+  "maxConcentration": 7500,
+  "minConcentration": 5000,
+  "source": "http://www.airqualitynow.eu/"
+},
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background", "Roadside"],
+  "pollutant": "CO",
+  "indexClass": "Medium",
+  "maxConcentration": 10000,
+  "minConcentration": 7500,
+  "source": "http://www.airqualitynow.eu/"
+},
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background", "Roadside"],
+  "pollutant": "CO",
+  "indexClass": "High",
+  "maxConcentration": 20000,
+  "minConcentration": 10000,
+  "source": "http://www.airqualitynow.eu/"
+},
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background", "Roadside"],
+  "pollutant": "CO",
+  "indexClass": "VeryHigh",
+  "maxConcentration": 99999,
+  "minConcentration": 20000,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background"],
+  "pollutant": "O3",
+  "indexClass": "VeryLow",
+  "maxConcentration": 60,
+  "minConcentration": 0,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background"],
+  "pollutant": "O3",
+  "indexClass": "Low",
+  "maxConcentration": 120,
+  "minConcentration": 60,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background"],
+  "pollutant": "O3",
+  "indexClass": "Medium",
+  "maxConcentration": 180,
+  "minConcentration": 120,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background"],
+  "pollutant": "O3",
+  "indexClass": "High",
+  "maxConcentration": 240,
+  "minConcentration": 180,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Background"],
+  "pollutant": "O3",
+  "indexClass": "VeryHigh",
+  "maxConcentration": 99999,
+  "minConcentration": 240,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "PM10",
+  "indexClass": "VeryLow",
+  "maxConcentration": 25,
+  "minConcentration": 0,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "PM10",
+  "indexClass": "Low",
+  "maxConcentration": 50,
+  "minConcentration": 25,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "PM10",
+  "indexClass": "Medium",
+  "maxConcentration": 90,
+  "minConcentration": 50,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "PM10",
+  "indexClass": "High",
+  "maxConcentration": 180,
+  "minConcentration": 90,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "PM10",
+  "indexClass": "VeryHigh",
+  "maxConcentration": 99999,
+  "minConcentration": 180,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "NO2",
+  "indexClass": "VeryLow",
+  "maxConcentration": 50,
+  "minConcentration": 0,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "NO2",
+  "indexClass": "Low",
+  "maxConcentration": 100,
+  "minConcentration": 50,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "NO2",
+  "indexClass": "Medium",
+  "maxConcentration": 200,
+  "minConcentration": 100,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "NO2",
+  "indexClass": "High",
+  "maxConcentration": 400,
+  "minConcentration": 200,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "type": "AirQualityThreshold",
+  "frequency": "Hourly",
+  "category": ["Roadside","Background"],
+  "pollutant": "NO2",
+  "indexClass": "VeryHigh",
+  "maxConcentration": 99999,
+  "minConcentration": 400,
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "id": "EU-AirQualityIndex-VeryLow",
+  "type": "AirQualityIndexClass",
+  "name": "VeryLow",
+  "startValue": 0,
+  "endValue": 25,
+  "description": "Very Low",
+  "category": "No risk",
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "id": "EU-AirQualityIndex-Low",
+  "type": "AirQualityIndexClass",
+  "name": "Low",
+  "startValue": 25,
+  "endValue": 50,
+  "description": "Low",
+  "category": "No risk",
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "id":   "EU-AirQualityIndex-Medium",
+  "type": "AirQualityIndexClass",
+  "name": "Medium",
+  "startValue": 50,
+  "endValue": 75,
+  "description": "Medium",
+  "category": "Unhealthy",
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "id": "EU-AirQualityIndex-High",
+  "type": "AirQualityIndexClass",
+  "name": "High",
+  "startValue": 75,
+  "endValue": 100,
+  "description": "High",
+  "category": "Very unhealthy",
+  "source": "http://www.airqualitynow.eu/"
+},
+
+{
+  "id": "EU-AirQualityIndex-VeryHigh",
+  "type": "AirQualityIndexClass",
+  "name": "VeryHigh",
+  "startValue": 100,
+  "endValue": 99999,
+  "description": "Very high",
+  "category": "Hazardous",
+  "source": "http://www.airqualitynow.eu/"
+}
+
+]
